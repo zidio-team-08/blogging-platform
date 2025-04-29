@@ -54,7 +54,7 @@ const Register = () => {
                             autoComplete='off'
                         />
                     </div>
-                    {errors.username && <p className="text-error text-[13px] font-semibold">{errors.username.message}</p>}
+                    {errors.name && <p className="text-error text-[13px] font-semibold">{errors.name.message}</p>}
 
                     <div className='w-full input focus-within:outline-none focus-within:border-primary my-2'>
                         <span className="px-1"><MdOutlineMail size={16} /></span>
