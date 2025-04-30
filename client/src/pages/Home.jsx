@@ -5,7 +5,9 @@ import NavBar from "../components/NavBar";
 import { Link } from 'react-router-dom';
 import img01 from "../assets/img01.jpg";
 import img02 from "../assets/img02.jpg";
-
+import img03 from "../assets/img03.png";
+import img04 from "../assets/img04.jpg";
+import img05 from "../assets/img05.png";
 const articles = [
   {
     title: "Understanding Clean Architecture",
@@ -23,7 +25,32 @@ const articles = [
     comments: "32",
     image: img02,
   },
+  {
+    title: "The Power of Consistency in Learning Code",
+    description: "Why small daily progress beats intense weekly grind.",
+    date: "Feb 20, 2025",
+    views: "850",
+    comments: "27",
+    image: img03,
+  },
+  {
+    title: "From Zero to Hero with JavaScript",
+    description: "A roadmap to becoming a JavaScript developer in 2025.",
+    date: "Jan 10, 2025",
+    views: "1.5K",
+    comments: "60",
+    image: img04,
+  },
+  {
+    title: "Should You Still Learn Web Development?",
+    description: "Breaking down myths and facts about web development in 2025.",
+    date: "Dec 18, 2024",
+    views: "1.1K",
+    comments: "41",
+    image: img05,
+  },
 ];
+
 
 
 const staffPicks = [
@@ -37,7 +64,33 @@ const staffPicks = [
     title: "My Notes App Is a Beautiful Mess",
     date: "Apr 17",
   },
+  {
+    name: "Anjali Rao",
+    title: "Coding After Midnight: A Ritual",
+    date: "Apr 10",
+  },
+  {
+    name: "Sahil Sharma",
+    title: "Why I Stopped Using To-Do Lists",
+    date: "Apr 3",
+  },
+  {
+    name: "Rekha Desai",
+    title: "Living Without Notifications for a Month",
+    date: "Mar 28",
+  },
+  {
+    name: "Karan Mehta",
+    title: "The UI Design Mistakes I Keep Making",
+    date: "Mar 20",
+  },
+  {
+    name: "Nikita Joshi",
+    title: "How I Made My Portfolio in One Weekend",
+    date: "Mar 15",
+  },
 ];
+
 
 const Home = () => {
   return (
