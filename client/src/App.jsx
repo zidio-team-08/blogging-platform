@@ -5,9 +5,15 @@ import Loader from './components/Loader';
 const Home = lazy(() => import("./pages/Home"));
 const Register = lazy(() => import("./pages/Register"));
 const Login = lazy(() => import("./pages/Login"));
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const App = () => {
+
+    // React Query
+    const queryClient = new QueryClient()
+
     return (
+<<<<<<< HEAD
         <Suspense fallback={<div className='w-full h-screen flex items-center justify-center'><Loader /></div>}>
             <Routes>
                 <Route path='/' element={<Home />} />
@@ -16,6 +22,22 @@ const App = () => {
                 <Route path='/login' element={<Login />} />
             </Routes>
         </Suspense>
+=======
+
+        <QueryClientProvider client={queryClient}>
+            <Suspense fallback={
+                <div className='w-full h-screen flex items-center justify-center'>
+                    <Loader />
+                </div>
+            }>
+                <Routes>
+                    <Route path='/' element={<Home />} />
+                    <Route path='/register' element={<Register />} />
+                    <Route path='/login' element={<Login />} />
+                </Routes>
+            </Suspense>
+        </QueryClientProvider>
+>>>>>>> 5d61d6ea8334bc878d05a0b61b86b32dc7e82f8f
     )
 }
 

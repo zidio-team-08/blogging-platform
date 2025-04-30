@@ -6,8 +6,15 @@ import { FiUser } from "react-icons/fi";
 import { MdOutlineMail } from "react-icons/md";
 import { FaEye, FaEyeSlash, FaRegCircleUser } from "react-icons/fa6";
 import { FiLock } from "react-icons/fi";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
+import useAxios from '../hook/useAxios';
+import toast from 'react-hot-toast';
+import Button from '../components/Button';
+import { registerSchema } from '../validator/authValidator';
+import { handleResponse } from '../utils/responseHandler';
 
+<<<<<<< HEAD
 
 const schema = yup.object({
     email: yup.string().email('Invalid email format').required('Please enter email'),
@@ -20,26 +27,58 @@ const schema = yup.object({
         .min(6, 'Password must be at least 6 characters')
         .max(20, 'Password cannot exceed 20 characters')
 });
+=======
+>>>>>>> 5d61d6ea8334bc878d05a0b61b86b32dc7e82f8f
 
-const Login = () => {
+const Register = () => {
 
     const [passwordVisible, setPasswordVisible] = useState(false);
+    const { fetchData } = useAxios();
+    const navigate = useNavigate();
 
     const { register, handleSubmit, formState: { errors } } = useForm({
-        resolver: yupResolver(schema)
+        resolver: yupResolver(registerSchema)
     });
 
-    const onSubmit = (data) => {
-        console.log(data);
-        // Handle form submission here
-    };
-
+    const mutation = useMutation({
+        mutationKey: ['SIGNUP'],
+        mutationFn: async (data) => await fetchData({
+            url: '/api/auth/signup',
+            method: 'POST',
+            data
+        }),
+        onSuccess: (data) => {
+            const { success, message } = handleResponse(data);
+            if (success && message == "User created successfully") {
+                toast.success('Account created successfully');
+                // const token = data.token;
+                navigate('/', { replace: true });
+            } else {
+                toast.error(data.message);
+            }
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
 
     return (
         <div className='w-full min-h-screen flex items-center justify-center'>
             <div className="w-[95%] sm:max-w-md bg-white rounded-md shadow-sm p-4 flex items-center justify-center flex-col">
-                <h2 className="text-center text-zinc-800 text-xl font-bold my-2 uppercase">Login</h2>
-                <form method="post" onSubmit={handleSubmit(onSubmit)} className='w-full p-2'>
+                <h2 className="text-center text-zinc-800 text-xl font-bold my-2 uppercase">Create Account</h2>
+                <form method="post" onSubmit={handleSubmit(mutation.mutate)} className='w-full p-2'>
+                    <div className='w-full input focus-within:outline-none focus-within:border-primary my-2'>
+                        <span className="px-1"><FiUser size={16} /></span>
+                        <input
+                            type="text"
+                            placeholder="Enter Full Name"
+                            className='w-full font-medium text-md'
+                            {...register('name')}
+                            autoComplete='off'
+                        />
+                    </div>
+                    {errors.name && <p className="text-error text-[13px] font-semibold">{errors.name.message}</p>}
+
                     <div className='w-full input focus-within:outline-none focus-within:border-primary my-2'>
                         <span className="px-1"><MdOutlineMail size={16} /></span>
                         <input
@@ -51,6 +90,18 @@ const Login = () => {
                         />
                     </div>
                     {errors.email && <p className="text-error text-[13px] font-semibold">{errors.email.message}</p>}
+
+                    <div className='w-full input focus-within:outline-none focus-within:border-primary my-2'>
+                        <span className="px-1"><FaRegCircleUser size={16} /></span>
+                        <input
+                            type="text"
+                            placeholder="Enter Username"
+                            className='w-full font-medium text-md'
+                            {...register('username')}
+                            autoComplete='off'
+                        />
+                    </div>
+                    {errors.username && <p className="text-error text-[13px] font-semibold">{errors.username.message}</p>}
 
                     <div className='w-full input focus-within:outline-none relative focus-within:border-primary my-2'>
                         <span className="px-1"><FiLock size={16} /></span>
@@ -67,10 +118,12 @@ const Login = () => {
                         }
                     </div>
                     {errors.password && <p className="text-error text-[13px] font-semibold">{errors.password.message}</p>}
-                    <button className="btn btn-primary w-full mt-2">Login</button>
+                    <Button loading={mutation.isPending} />
                 </form>
-                <p className='text-sm font-semibold my-1'>Don't have an account? <Link to="/register" className='text-primary'>Register</Link></p>
+                <p className='text-sm font-semibold my-1'>Already have an account? <Link to="/login" className='text-primary'>Login</Link></p>
             </div>
         </div>
-    )
-}
+    );
+};
+
+export default Register
