@@ -3,6 +3,8 @@ import express from "express";
 import connectDB from "./config/db.js";
 import authRoute from "./routes/auth.route.js";
 import cookieParser from "cookie-parser";
+import { limiter } from "./config/rate.limiter.js";
+import helmet from "helmet";
 
 dotenv.config();
 
@@ -13,12 +15,14 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(helmet());
+
 
 //database connection
 connectDB();
 
 //Routes
-app.use("/api/auth", authRoute);
+app.use("/api/auth", limiter, authRoute);
 
 app.get('/', (req, res) => {
     res.send("Hello..!");
