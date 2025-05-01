@@ -1,9 +1,11 @@
 import React, { useState, useRef } from 'react'
 import FeedSidebar from './FeedSidebar'
 import { FiImage, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
+import { useNavigate } from 'react-router-dom';
 
 const Feed = () => {
     const scrollRef = useRef(null);
+    const navigate = useNavigate();
 
     // Blog categories
     const categories = [
@@ -125,7 +127,7 @@ const Feed = () => {
 
                 {/* Blog posts */}
                 {blogs.map(blog => (
-                    <div key={blog.id} className='w-full max-w-[680px] cursor-pointer my-6 p-5 border border-base-300 rounded-lg mx-auto flex gap-5 bg-white transition-all duration-200'>
+                    <div key={blog.id} className='w-full max-w-[680px] cursor-pointer my-6 p-5 border border-base-300 rounded-lg mx-auto flex gap-5 bg-white transition-all duration-200' onClick={()=>navigate(`/blog/${blog.id}`)}>
                         <div className='flex-1'>
                             <h2 className='text-xl font-bold mb-2 hover:text-primary transition-colors'>{blog.title}</h2>
                             <p className='text-gray-600 mb-4 line-clamp-2'>{blog.content}</p>
