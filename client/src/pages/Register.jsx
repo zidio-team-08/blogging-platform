@@ -14,21 +14,6 @@ import Button from '../components/Button';
 import { registerSchema } from '../validator/authValidator';
 import { handleResponse } from '../utils/responseHandler';
 
-<<<<<<< HEAD
-
-const schema = yup.object({
-    email: yup.string().email('Invalid email format').required('Please enter email'),
-    password: yup.string()
-        .required('Please enter password')
-        .matches(/.*[A-Z].*/, 'Password must contain at least one uppercase letter')
-        .matches(/.*[a-z].*/, 'Password must contain at least one lowercase letter')
-        .matches(/.*\d.*/, 'Password must contain at least one number')
-        .matches(/.*[~<>?,./!@#$%^&*()\\-_+="'|{}\[\];:\\].*/, 'Password must contain at least one special character')
-        .min(6, 'Password must be at least 6 characters')
-        .max(20, 'Password cannot exceed 20 characters')
-});
-=======
->>>>>>> 5d61d6ea8334bc878d05a0b61b86b32dc7e82f8f
 
 const Register = () => {
 

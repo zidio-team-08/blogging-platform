@@ -13,16 +13,6 @@ const App = () => {
     const queryClient = new QueryClient()
 
     return (
-<<<<<<< HEAD
-        <Suspense fallback={<div className='w-full h-screen flex items-center justify-center'><Loader /></div>}>
-            <Routes>
-                <Route path='/' element={<Home />} />
-                <Route path='/home' element={<Home />} />
-                <Route path='/register' element={<Register />} />
-                <Route path='/login' element={<Login />} />
-            </Routes>
-        </Suspense>
-=======
 
         <QueryClientProvider client={queryClient}>
             <Suspense fallback={
@@ -37,7 +27,6 @@ const App = () => {
                 </Routes>
             </Suspense>
         </QueryClientProvider>
->>>>>>> 5d61d6ea8334bc878d05a0b61b86b32dc7e82f8f
     )
 }
 
