@@ -7,6 +7,8 @@ const Register = lazy(() => import("./pages/Register"));
 const Login = lazy(() => import("./pages/Login"));
 const Blog = lazy(() => import("./pages/Blog"));
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import NewStory from './pages/NewStory';
+import ProtectedRoutes from './ProtectedRoutes';
 
 const App = () => {
 
@@ -26,6 +28,11 @@ const App = () => {
                     <Route path='/login' element={<Login />} />
 
                     <Route path='/blog/:id' element={<Blog />} />
+                    <Route path='/new-story' element={
+                        <ProtectedRoutes>
+                            <NewStory />
+                        </ProtectedRoutes>
+                    } />
 
                 </Routes>
             </Suspense>
