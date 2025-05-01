@@ -46,7 +46,7 @@ const FeedSidebar = () => {
 
 
     return (
-        <div className='w-full max-w-[368px] border-l border-base-300 px-2 py-5'>
+        <div className='w-full max-w-[368px] border-l border-base-300 px-2 py-5 max-[1000px]:hidden'>
             <div>
                 <h6 className="p-4 pb-2 text-md font-medium opacity-60 tracking-wide mb-2">Recommended Topics</h6>
                 <div className="px-4 pb-4 flex flex-wrap gap-3">

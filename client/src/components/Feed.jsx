@@ -95,19 +95,19 @@ const Feed = () => {
                 <div className='w-full max-w-[680px] mx-auto mb-6 relative sticky top-0 bg-white z-20 py-2 border-b border-base-300'>
                     <button
                         onClick={() => scroll('left')}
-                        className='absolute -left-5 top-1/2 -translate-y-1/2 cursor-pointer bg-white rounded-full p-2 z-10'>
+                        className='absolute -left-5 top-1/2 max-[720px]:hidden -translate-y-1/2 cursor-pointer bg-white rounded-full p-2 z-10'>
                         <FiChevronLeft size={20} />
                     </button>
 
                     <div
                         ref={scrollRef}
-                        className='flex gap-3 overflow-x-auto py-3 px-8 scrollbar-hide'
+                        className='flex gap-2 md:gap-3 overflow-x-auto py-2 md:py-3 px-4 md:px-8 scrollbar-hide'
                         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                         {categories.map(category => (
                             <button
                                 key={category}
                                 onClick={() => setActiveCategory(category)}
-                                className={`px-5 py-2 rounded-full cursor-pointer text-sm font-medium whitespace-nowrap transition-all duration-200 ${activeCategory === category
+                                className={`px-3 md:px-5 py-1.5 md:py-2 rounded-full cursor-pointer text-xs md:text-sm font-medium whitespace-nowrap transition-all duration-200 ${activeCategory === category
                                     ? 'bg-primary text-white shadow-md'
                                     : 'bg-gray-100 hover:bg-gray-200 hover:shadow-sm'
                                     }`}
@@ -119,7 +119,7 @@ const Feed = () => {
 
                     <button
                         onClick={() => scroll('right')}
-                        className='absolute -right-5 top-1/2 -translate-y-1/2 cursor-pointer bg-white rounded-full p-2 z-10'
+                        className='absolute -right-5 top-1/2 max-[720px]:hidden -translate-y-1/2 cursor-pointer bg-white rounded-full p-2 z-10'
                     >
                         <FiChevronRight size={20} />
                     </button>
@@ -127,21 +127,21 @@ const Feed = () => {
 
                 {/* Blog posts */}
                 {blogs.map(blog => (
-                    <div key={blog.id} className='w-full max-w-[680px] cursor-pointer my-6 p-5 border border-base-300 rounded-lg mx-auto flex gap-5 bg-white transition-all duration-200' onClick={()=>navigate(`/blog/${blog.id}`)}>
-                        <div className='flex-1'>
-                            <h2 className='text-xl font-bold mb-2 hover:text-primary transition-colors'>{blog.title}</h2>
-                            <p className='text-gray-600 mb-4 line-clamp-2'>{blog.content}</p>
-                            <div className='flex justify-between items-center text-sm'>
+                    <div key={blog.id} className='w-full max-w-[680px] cursor-pointer my-6 p-3 md:p-5 border border-base-300 rounded-lg mx-auto flex flex-col md:flex-row gap-3 md:gap-5 bg-white transition-all duration-200' onClick={() => navigate(`/blog/${blog.id}`)}>
+                        <div className='flex-1 order-2 md:order-1'>
+                            <h2 className='text-lg md:text-xl font-bold mb-2 hover:text-primary transition-colors'>{blog.title}</h2>
+                            <p className='text-gray-600 mb-3 md:mb-4 line-clamp-2 text-sm md:text-base'>{blog.content}</p>
+                            <div className='flex justify-between items-center text-xs md:text-sm'>
                                 <span className='text-gray-500 flex items-center gap-1'>
                                     <span className='font-medium text-gray-700'>By {blog.author}</span> • {blog.date}
                                 </span>
-                                <div className='flex gap-4'>
+                                <div className='flex gap-3 md:gap-4'>
                                     <span className='flex items-center gap-1 text-rose-500'>❤️ {blog.likes}</span>
                                     <span className='flex items-center gap-1 text-blue-500'>💬 {blog.comments}</span>
                                 </div>
                             </div>
                         </div>
-                        <div className='w-36 h-28 rounded-md overflow-hidden flex-shrink-0 shadow-sm'>
+                        <div className='w-full md:w-36 h-40 md:h-28 rounded-md overflow-hidden flex-shrink-0 shadow-sm order-1 md:order-2'>
                             {blog.image ? (
                                 <img src={blog.image} alt={blog.title} className='w-full h-full object-cover hover:scale-105 transition-transform duration-300' />
                             ) : (

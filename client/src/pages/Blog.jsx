@@ -260,7 +260,7 @@ const Blog = () => {
                         <img
                             src={blog.authorAvatar}
                             alt={blog.author}
-                            className="w-12 h-12 rounded-full object-cover"
+                            className="w-12 h-12 rounded-full object-cover max-sm:hidden"
                         />
                         <div>
                             <p className="font-medium">{blog.author}</p>
@@ -276,11 +276,11 @@ const Blog = () => {
                     {/* Comment form */}
                     <form onSubmit={handleCommentSubmit} className="mb-8">
                         <div className="flex gap-4">
-                            <div className="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
+                            <div className="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden max-sm:hidden">
                                 <img
                                     src="https://randomuser.me/api/portraits/lego/1.jpg"
                                     alt="Your avatar"
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover "
                                 />
                             </div>
                             <div className="flex-1">
@@ -307,7 +307,7 @@ const Blog = () => {
                     <div className="space-y-6">
                         {comments.map(comment => (
                             <div key={comment.id} className="flex gap-4">
-                                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 max-sm:hidden">
                                     <img
                                         src={comment.avatar}
                                         alt={comment.author}

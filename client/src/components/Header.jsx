@@ -23,11 +23,11 @@ const Header = () => {
                     <FiEdit size={20} />
                     <span className='font-semibold max-[810px]:hidden'>Write</span>
                 </Link>
-                <Link to='/notifications' className='flex items-center justify-center gap-2'>
+                {/* <Link to='/notifications' className='flex items-center justify-center gap-2'>
                     <div className='btn btn-ghost btn-circle' >
                         <RiNotification3Line size={20} />
                     </div>
-                </Link>
+                </Link> */}
                 <button className='btn btn-ghost btn-circle'>
                     <FiUser size={20} />
                 </button>
