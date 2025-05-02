@@ -1,14 +1,15 @@
 import React, { lazy, Suspense } from 'react'
 import './App.css'
 import { Route, Routes } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Loader from './components/Loader';
 const Home = lazy(() => import("./pages/Home"));
 const Register = lazy(() => import("./pages/Register"));
 const Login = lazy(() => import("./pages/Login"));
 const Blog = lazy(() => import("./pages/Blog"));
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import NewStory from './pages/NewStory';
+const NewStory = lazy(() => import("./pages/NewStory"));
 import ProtectedRoutes from './ProtectedRoutes';
+const Profile = lazy(() => import("./pages/Profile"));
 
 const App = () => {
 
@@ -31,6 +32,11 @@ const App = () => {
                     <Route path='/new-story' element={
                         <ProtectedRoutes>
                             <NewStory />
+                        </ProtectedRoutes>
+                    } />
+                    <Route path='/profile' element={
+                        <ProtectedRoutes>
+                            <Profile />
                         </ProtectedRoutes>
                     } />
 
