@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import authRoute from "./routes/auth.route.js";
 import { limiter } from "./config/rate.limiter.js";
+import blogRoutes from "./routes/blog.routes.js";
 import helmet from "helmet";
 import cors from "cors";
  
@@ -32,7 +33,8 @@ app.use(cors(corsOptions));
 connectDB();
 //Routes
 app.use("/api/auth", limiter, authRoute);
-
+app.use("/api/blogs",blogRoutes);
+app.use("/api/blogs/comment",blogRoutes);
 app.get('/', (req, res) => {
     res.send("Hello..!");
 });
