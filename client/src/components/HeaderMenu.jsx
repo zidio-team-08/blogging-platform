@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 import { AiOutlineSetting } from 'react-icons/ai'
-import { FaRegUserCircle } from 'react-icons/fa'
+import { FaRegUserCircle, FaRegWindowRestore } from 'react-icons/fa'
 import { FiUser } from 'react-icons/fi'
 import { MdModeEdit } from 'react-icons/md'
 import { RiLogoutCircleRLine } from 'react-icons/ri'
 import { Link } from 'react-router-dom'
+import { LuBookmarkCheck } from 'react-icons/lu'
 
 const HeaderMenu = ({ showMenu, setShowMenu, showMenuBtnRef, modalRef }) => {
 
@@ -40,29 +41,39 @@ const HeaderMenu = ({ showMenu, setShowMenu, showMenuBtnRef, modalRef }) => {
                             <FiUser size={25} />
                         </div>
                         <div>
-                            <p className="font-bold text-sm">@username</p>
+                            <p className="font-medium text-sm">@username</p>
                             <p className="text-sm text-gray-700">email@gmail.com</p>
                         </div>
                     </div>
                 </div>
                 <div className="w-full" onClick={() => setShowMenu(false)}>
-                    <Link to='/new-story' className="flex items-center border-b-2 border-base-300 px-4 py-3 gap-3 hover:bg-base-300">
-                        <MdModeEdit size={20} />
-                        <p className="text-md font-semibold">New Story</p>
+                    <Link to='/new-story' className="flex items-center border-b border-base-300 px-4 py-3 gap-3 hover:bg-base-300">
+                        <MdModeEdit size={18} />
+                        <p className="text-sm font-medium">New Story</p>
                     </Link>
 
 
-                    <Link to='/profile' className="flex items-center border-b-2 border-base-300 px-4 py-3 gap-3 hover:bg-base-300">
-                        <FaRegUserCircle size={20} />
-                        <p className="text-md font-semibold">Profile</p>
+                    <Link to='/profile' className="flex items-center border-b border-base-300 px-4 py-3 gap-3 hover:bg-base-300">
+                        <FaRegUserCircle size={18} />
+                        <p className="text-sm font-medium">Profile</p>
+                    </Link>
+
+                    <Link to='/my-stories' className="flex items-center border-b border-base-300 px-4 py-3 gap-3 hover:bg-base-300">
+                        <FaRegWindowRestore size={18} />
+                        <p className="text-sm font-medium">My Stories</p>
+                    </Link>
+
+                    <Link to='/saved' className="flex items-center border-b border-base-300 px-4 py-3 gap-3 hover:bg-base-300">
+                        <LuBookmarkCheck size={18} />
+                        <p className="text-sm font-medium">Saved</p>
                     </Link>
 
                     <button
                         type='button'
                         onClick={menuBtnClick}
                         className="w-full cursor-pointer flex items-center text-red-500 px-4 py-3 gap-3 hover:bg-red-50">
-                        <RiLogoutCircleRLine size={20} />
-                        <p className="text-md font-semibold">Logout</p>
+                        <RiLogoutCircleRLine size={18} />
+                        <p className="text-sm font-medium">Logout</p>
                     </button>
                 </div>
             </div>

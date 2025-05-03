@@ -18,15 +18,13 @@ const Header = () => {
                 <Link to='/'>
                     <h1 className='text-xl font-semibold capitalize'>Postilo</h1>
                 </Link>
-                {/* center search */}
-
                 {
                     location.pathname == '/' && (
-                        <div className='w-full input max-w-96 focus-within:shadow-none focus-within:outline-none focus-within:border-primary mx-auto absolute left-1/2 -translate-x-1/2 max-[810px]:hidden rounded-3xl'>
+                        <div className='w-full input max-w-96 focus-within:shadow-none focus-within:outline-none focus-within:border-primary mx-auto absolute left-1/2 -translate-x-1/2 max-[810px]:hidden rounded-md'>
                             <input
                                 type="text"
                                 placeholder="Search"
-                                className=" font-semibold pl-3" />
+                                className=" font-medium pl-3" />
                             <span><FiSearch className='cursor-pointer' size={18} /></span>
                         </div>
                     )
