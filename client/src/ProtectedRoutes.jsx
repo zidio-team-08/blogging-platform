@@ -3,7 +3,7 @@ import Header from './components/Header';
 
 const ProtectedRoutes = ({ children }) => {
     return (
-        <main>
+        <main className='bg-base-100'>
             <Header />
             {children}
         </main>

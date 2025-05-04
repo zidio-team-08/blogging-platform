@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react'
 import FeedSidebar from './FeedSidebar'
 import { FiImage, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom';
+import { FaHeart } from 'react-icons/fa';
+import { MdInsertComment } from 'react-icons/md';
 
 const Feed = () => {
     const scrollRef = useRef(null);
@@ -89,13 +91,13 @@ const Feed = () => {
     ];
 
     return (
-        <div className='w-full bg-[#ffffff] flex justify-center'>
+        <div className='w-full bg-base-100 flex justify-center'>
             <div className='w-full max-w-[968px]'>
                 {/* Categories with scroll buttons */}
-                <div className='w-full max-w-[680px] mx-auto mb-6 relative sticky top-0 bg-white z-20 py-2 border-b border-base-300'>
+                <div className='w-full max-w-[700px] mx-auto mb-6 relative sticky top-0 bg-base-100 z-20 py-2 border-b border-base-300'>
                     <button
                         onClick={() => scroll('left')}
-                        className='absolute -left-5 top-1/2 max-[720px]:hidden -translate-y-1/2 cursor-pointer bg-white rounded-full p-2 z-10'>
+                        className='absolute -left-5 top-1/2 max-[720px]:hidden -translate-y-1/2 cursor-pointer bg-base-100 rounded-full p-2 z-10'>
                         <FiChevronLeft size={20} />
                     </button>
 
@@ -109,9 +111,8 @@ const Feed = () => {
                                 onClick={() => setActiveCategory(category)}
                                 className={`px-3 md:px-5 py-1.5 md:py-2 rounded-full cursor-pointer text-xs md:text-sm font-medium whitespace-nowrap transition-all duration-200 ${activeCategory === category
                                     ? 'bg-primary text-white shadow-md'
-                                    : 'bg-gray-100 hover:bg-gray-200 hover:shadow-sm'
-                                    }`}
-                            >
+                                    : 'bg-base-100 hover:bg-base-300 hover:shadow-sm'
+                                    }`}>
                                 {category}
                             </button>
                         ))}
@@ -119,15 +120,14 @@ const Feed = () => {
 
                     <button
                         onClick={() => scroll('right')}
-                        className='absolute -right-5 top-1/2 max-[720px]:hidden -translate-y-1/2 cursor-pointer bg-white rounded-full p-2 z-10'
-                    >
+                        className='absolute -right-5 top-1/2 max-[720px]:hidden -translate-y-1/2 cursor-pointer bg-base-100 rounded-full p-2 z-10'>
                         <FiChevronRight size={20} />
                     </button>
                 </div>
 
                 {/* Blog posts */}
                 {blogs.map(blog => (
-                    <div key={blog.id} className='w-full max-w-[680px] cursor-pointer my-6 p-3 md:p-5 border border-base-300 rounded-lg mx-auto flex flex-col md:flex-row gap-3 md:gap-5 bg-white transition-all duration-200' onClick={() => navigate(`/blog/${blog.id}`)}>
+                    <div key={blog.id} className='w-full max-w-[680px] cursor-pointer my-6 p-3 md:p-5 border border-base-300 rounded-lg mx-auto flex flex-col md:flex-row gap-3 md:gap-5 bg-base-100 transition-all duration-200' onClick={() => navigate(`/blog/${blog.id}`)}>
                         <div className='flex-1 order-2 md:order-1'>
                             <h2 className='text-lg md:text-xl font-bold mb-2 hover:text-primary transition-colors'>{blog.title}</h2>
                             <p className='text-gray-600 mb-3 md:mb-4 line-clamp-2 text-sm md:text-base'>{blog.content}</p>
@@ -136,8 +136,8 @@ const Feed = () => {
                                     <span className='font-medium text-gray-700'>By {blog.author}</span> • {blog.date}
                                 </span>
                                 <div className='flex gap-3 md:gap-4'>
-                                    <span className='flex items-center gap-1 text-rose-500'>❤️ {blog.likes}</span>
-                                    <span className='flex items-center gap-1 text-blue-500'>💬 {blog.comments}</span>
+                                    <span className='flex items-center gap-1 text-rose-500'><FaHeart />{blog.likes}</span>
+                                    <span className='flex items-center gap-1 text-blue-500'><MdInsertComment />{blog.comments}</span>
                                 </div>
                             </div>
                         </div>

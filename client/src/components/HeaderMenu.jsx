@@ -34,15 +34,15 @@ const HeaderMenu = ({ showMenu, setShowMenu, showMenuBtnRef, modalRef }) => {
 
     return (
         <>
-            <div className='w-60 absolute right-0 top-12 shadow-xl border border-base-300 rounded-md bg-white z-50' ref={menuRef}>
+            <div className='w-60 absolute right-0 top-12 shadow-xl border border-base-300 rounded-md bg-base-100 z-50' ref={menuRef}>
                 <div className="border-b border-base-300">
                     <div className="flex items-center gap-5 p-4">
-                        <div className="bg-gray-200 p-2 rounded-full">
+                        <div className="bg-base-200 p-2 rounded-full">
                             <FiUser size={25} />
                         </div>
                         <div>
                             <p className="font-medium text-sm">@username</p>
-                            <p className="text-sm text-gray-700">email@gmail.com</p>
+                            <p className="text-sm text-base-500">email@gmail.com</p>
                         </div>
                     </div>
                 </div>
@@ -71,7 +71,7 @@ const HeaderMenu = ({ showMenu, setShowMenu, showMenuBtnRef, modalRef }) => {
                     <button
                         type='button'
                         onClick={menuBtnClick}
-                        className="w-full cursor-pointer flex items-center text-red-500 px-4 py-3 gap-3 hover:bg-red-50">
+                        className="w-full cursor-pointer flex items-center text-error px-4 py-3 gap-3  hover:bg-base-300">
                         <RiLogoutCircleRLine size={18} />
                         <p className="text-sm font-medium">Logout</p>
                     </button>

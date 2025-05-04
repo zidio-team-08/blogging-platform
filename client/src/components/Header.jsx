@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { FiEdit, FiSearch, FiUser } from 'react-icons/fi';
 import HeaderMenu from './HeaderMenu';
 import Logout from './modal/Logout';
+import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
 
@@ -32,16 +33,16 @@ const Header = () => {
 
                 <div className='flex items-center gap-2'>
                     <div className='max-[810px]:block hidden'><FiSearch size={25} /></div>
-                    <Link to='/new-story' className='flex items-center justify-center gap-2 max-[810px]:hidden'>
-                        <FiEdit size={20} />
-                        <span className='font-semibold max-[810px]:hidden'>Write</span>
+                    <Link to='/new-story' className='flex items-center justify-center gap-2 max-[810px]:hidden hover:bg-base-200 px-4 py-2 rounded-full'>
+                        <FiEdit size={17} />
+                        <span className='font-medium text-sm max-[810px]:hidden'>Write</span>
                     </Link>
+                    <ThemeToggle />
 
                     <div className='relative'>
                         <button ref={showMenuBtnRef} onClick={() => setShowMenu(!showMenu)} role="button" className='btn btn-ghost btn-circle'>
                             <FiUser size={20} />
                         </button>
-
                         {showMenu && <HeaderMenu modalRef={modalRef} showMenu={showMenu} setShowMenu={setShowMenu} showMenuBtnRef={showMenuBtnRef} />}
                     </div>
                 </div>
