@@ -45,7 +45,7 @@ const Editor = () => {
         // Log the collected data
         console.log('Story Data:', storyData);
 
-      
+
     }
 
     return (

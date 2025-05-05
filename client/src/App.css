@@ -1,8 +1,25 @@
+:root {
+    --font-1: 'Poppins', sans-serif;
+    --font-2: 'Outfit', sans-serif;
+    --font-3: 'Open Sans', sans-serif;
+}
+
 body {
     width: 100%;
     background-color: #ffffff;
     font-family: "Open Sans", sans-serif;
-
     /* F3F4F6 */
     /* fafafa */
+}
+
+.font1 {
+    font-family: var(--font-1);
+}
+
+.font2 {
+    font-family: var(--font-2);
+}
+
+.font3 {
+    font-family: var(--font-3);
 }
