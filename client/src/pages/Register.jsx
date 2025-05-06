@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
 import { FiUser } from "react-icons/fi";
 import { MdOutlineMail } from "react-icons/md";
 import { FaEye, FaEyeSlash, FaRegCircleUser } from "react-icons/fa6";
 import { FiLock } from "react-icons/fi";
 import { Link, useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
 import useAxios from '../hook/useAxios';
 import toast from 'react-hot-toast';
 import Button from '../components/Button';
 import { registerSchema } from '../validator/authValidator';
 import { handleResponse } from '../utils/responseHandler';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser } from '../features/authSlice';
 
 
 const Register = () => {
@@ -20,38 +20,50 @@ const Register = () => {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const { fetchData } = useAxios();
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const dispatch = useDispatch();
+    const { user } = useSelector((state) => state.auth);
+
+    useEffect(() => {
+        if (user) {
+            navigate('/', { replace: true });
+        }
+    }, [user]);
 
     const { register, handleSubmit, formState: { errors } } = useForm({
         resolver: yupResolver(registerSchema)
     });
 
-    const mutation = useMutation({
-        mutationKey: ['SIGNUP'],
-        mutationFn: async (data) => await fetchData({
-            url: '/api/auth/signup',
-            method: 'POST',
-            data
-        }),
-        onSuccess: (data) => {
-            const { success, message } = handleResponse(data);
+    // handle onSubmit 
+    const onSubmit = async (data) => {
+        setLoading(true);
+        try {
+            const response = await fetchData({
+                url: '/api/auth/signup',
+                method: 'POST',
+                data
+            });
+            const { success, message } = handleResponse(response);
             if (success && message == "User created successfully") {
                 toast.success('Account created successfully');
-                // const token = data.token;
+                dispatch(setUser({ user: response.user }));
                 navigate('/', { replace: true });
             } else {
-                toast.error(data.message);
+                toast.error(message);
             }
-        },
-        onError: (error) => {
-            toast.error(error.message);
+        } catch (error) {
+            const { message } = handleResponse(error);
+            toast.error(message);
+        } finally {
+            setLoading(false);
         }
-    });
+    };
 
     return (
-        <div className='w-full min-h-screen flex items-center justify-center'>
-            <div className="w-[95%] sm:max-w-md bg-white rounded-md shadow-sm p-4 flex items-center justify-center flex-col">
+        <div className='w-full min-h-screen flex items-center justify-center bg-base-300'>
+            <div className="w-[95%] sm:max-w-md bg-base-100 rounded-md shadow-sm p-4 flex items-center justify-center flex-col">
                 <h2 className="text-center text-zinc-800 text-xl font-bold my-2 uppercase">Create Account</h2>
-                <form method="post" onSubmit={handleSubmit(mutation.mutate)} className='w-full p-2'>
+                <form method="post" onSubmit={handleSubmit(onSubmit)} className='w-full p-2'>
                     <div className='w-full input focus-within:outline-none focus-within:border-primary my-2'>
                         <span className="px-1"><FiUser size={16} /></span>
                         <input
@@ -103,7 +115,7 @@ const Register = () => {
                         }
                     </div>
                     {errors.password && <p className="text-error text-[13px] font-semibold">{errors.password.message}</p>}
-                    <Button loading={mutation.isPending} />
+                    <Button title='Register' loading={loading} />
                 </form>
                 <p className='text-sm font-semibold my-1'>Already have an account? <Link to="/login" className='text-primary'>Login</Link></p>
             </div>

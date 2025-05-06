@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef } from 'react'
-import { AiOutlineSetting } from 'react-icons/ai'
 import { FaRegUserCircle, FaRegWindowRestore } from 'react-icons/fa'
 import { FiUser } from 'react-icons/fi'
 import { MdModeEdit } from 'react-icons/md'
@@ -7,7 +6,7 @@ import { RiLogoutCircleRLine } from 'react-icons/ri'
 import { Link } from 'react-router-dom'
 import { LuBookmarkCheck } from 'react-icons/lu'
 
-const HeaderMenu = ({ showMenu, setShowMenu, showMenuBtnRef, modalRef }) => {
+const HeaderMenu = ({ showMenu, setShowMenu, showMenuBtnRef, modalRef, user }) => {
 
     const menuRef = useRef(null);
 
@@ -29,20 +28,25 @@ const HeaderMenu = ({ showMenu, setShowMenu, showMenuBtnRef, modalRef }) => {
 
     const menuBtnClick = useCallback(() => {
         modalRef.current.showModal()
-        // setShowMenu(false);
     }, [showMenu]);
 
     return (
         <>
             <div className='w-60 absolute right-0 top-12 shadow-xl border border-base-300 rounded-md bg-base-100 z-50' ref={menuRef}>
-                <div className="border-b border-base-300">
-                    <div className="flex items-center gap-5 p-4">
-                        <div className="bg-base-200 p-2 rounded-full">
-                            <FiUser size={25} />
+                <div className="border-b border-base-300 overflow-hidden">
+                    <div className="flex items-center gap-3 sm:gap-5 py-2 px-3">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-base-200 rounded-full flex items-center justify-center flex-shrink-0">
+                            {user?.profileImage ? (
+                                <img src={user?.profileImage} alt="Profile" className='w-full h-full rounded-full object-cover' />
+                            ) : (
+                                <FiUser size={20} className="sm:text-2xl" />
+                            )}
                         </div>
-                        <div>
-                            <p className="font-medium text-sm">@username</p>
-                            <p className="text-sm text-base-500">email@gmail.com</p>
+                        <div className='flex flex-col overflow-hidden'>
+                            <p className="font-semibold capitalize text-xs sm:text-sm truncate">{user?.name || user?.username || "@username"}</p>
+                            {user?.email && (
+                                <p className="font-semibold text-xs text-base-content/60 truncate">{user?.email}</p>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -81,4 +85,4 @@ const HeaderMenu = ({ showMenu, setShowMenu, showMenuBtnRef, modalRef }) => {
     )
 }
 
-export default HeaderMenu
+export default HeaderMenu;

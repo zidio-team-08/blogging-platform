@@ -148,7 +148,6 @@ const Blog = () => {
     if (loading) {
         return (
             <>
-                <Header />
                 <div className="w-full min-h-screen flex items-center justify-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
                 </div>
@@ -158,7 +157,6 @@ const Blog = () => {
 
     return (
         <>
-            <Header />
             <div className="max-w-4xl mx-auto px-4 py-8">
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2 mb-4 mt-5">

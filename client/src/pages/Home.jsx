@@ -1,6 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import Header from '../components/Header';
 import Feed from '../components/Feed';
 
 const mockBlogs = [
@@ -24,7 +22,6 @@ const mockBlogs = [
 const Home = () => {
     return (
         <>
-            <Header />
             <div className="w-full min-h-screen">
                 <Feed />
             </div>

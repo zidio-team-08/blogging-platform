@@ -1,6 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import { axiosInstance } from '../utils/axiosInstance';
 
 const useAxios = () => {
+
+    const navigate = useNavigate();
+
     const fetchData = async ({
         url,
         method,
@@ -9,7 +13,10 @@ const useAxios = () => {
             'Content-Type': 'application/json',
         }
     }) => {
+
         try {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+
             const response = await axiosInstance({
                 method,
                 url,
@@ -17,20 +24,13 @@ const useAxios = () => {
                 headers,
             });
             return response.data;
+
         } catch (error) {
-
             const message = error.response?.data?.message || error.message || 'Something went wrong';
+            if (message == "Unauthorized access. Please login.") {
+                navigate('/login', { replace: true });
+            }
             return { success: false, message };
-
-            // if (error.response) {
-            //     console.error('Response error:', error.response.data);
-            //     return { message: error.response.data, status: error.response.status };
-            // } else if (error.request) {
-            //     console.error('Request error:', error.request);
-            //     return { message: 'No response from server', status: 0 };
-            // } else {
-            //     return { message: error.message, status: 0 };
-            // }
         }
     };
 

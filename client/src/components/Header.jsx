@@ -4,6 +4,7 @@ import { FiEdit, FiSearch, FiUser } from 'react-icons/fi';
 import HeaderMenu from './HeaderMenu';
 import Logout from './modal/Logout';
 import ThemeToggle from './ThemeToggle';
+import { useSelector } from 'react-redux';
 
 const Header = () => {
 
@@ -12,6 +13,7 @@ const Header = () => {
     const [showMenu, setShowMenu] = useState(false);
     const showMenuBtnRef = useRef(null);
     const modalRef = useRef(null);
+    const { user } = useSelector((state) => state.auth);
 
     return (
         <>
@@ -31,19 +33,22 @@ const Header = () => {
                     )
                 }
 
-                <div className='flex items-center gap-2'>
-                    <div className='max-[810px]:block hidden'><FiSearch size={25} /></div>
+                <div className='flex items-center gap-4'>
+                    <div className='max-[810px]:block hidden cursor-pointer hover:text-primary rounded-full'><FiSearch size={22} /></div>
                     <Link to='/new-story' className='flex items-center justify-center gap-2 max-[810px]:hidden hover:bg-base-200 px-4 py-2 rounded-full'>
                         <FiEdit size={17} />
                         <span className='font-medium text-sm max-[810px]:hidden'>Write</span>
                     </Link>
                     <ThemeToggle />
-
                     <div className='relative'>
-                        <button ref={showMenuBtnRef} onClick={() => setShowMenu(!showMenu)} role="button" className='btn btn-ghost btn-circle'>
-                            <FiUser size={20} />
+                        <button ref={showMenuBtnRef} onClick={() => setShowMenu(!showMenu)} role="button" className='btn btn-ghost btn-circle -mr-2'>
+                            {user?.profileImage ? (
+                                <img src={user?.profileImage} alt="Profile" className='w-8 h-8 rounded-full object-cover' />
+                            ) : (
+                                <FiUser size={20} />
+                            )}
                         </button>
-                        {showMenu && <HeaderMenu modalRef={modalRef} showMenu={showMenu} setShowMenu={setShowMenu} showMenuBtnRef={showMenuBtnRef} />}
+                        {showMenu && <HeaderMenu user={user} modalRef={modalRef} showMenu={showMenu} setShowMenu={setShowMenu} showMenuBtnRef={showMenuBtnRef} />}
                     </div>
                 </div>
             </div>

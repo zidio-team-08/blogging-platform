@@ -3,6 +3,8 @@ import './index.css'
 import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { Provider } from 'react-redux';
+import { store } from './redux/store.jsx';
 
 createRoot(document.getElementById('root')).render(
     <BrowserRouter>
@@ -15,10 +17,12 @@ createRoot(document.getElementById('root')).render(
                     background: '#333',
                     color: '#fff',
                     fontSize: '14px',
-                    fontWeight: 600,
+                    fontWeight: 400,
                 },
             }}
         />
-        <App />
+        <Provider store={store}>
+            <App />
+        </Provider>
     </BrowserRouter>
 )

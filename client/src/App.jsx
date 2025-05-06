@@ -26,7 +26,10 @@ const App = () => {
                 </div>
             }>
                 <Routes>
-                    <Route path='/' element={<Home />} />
+                    <Route path='/' element={
+                        <ProtectedRoutes>
+                            <Home />
+                        </ProtectedRoutes>} />
                     <Route path='/register' element={<Register />} />
                     <Route path='/login' element={<Login />} />
 
