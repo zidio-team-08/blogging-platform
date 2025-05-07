@@ -1,28 +1,29 @@
 # Blog API Documentation
 
-This document provides an overview of the APIs available for managing blogs in the application.
+This document provides an overview of the APIs available for managing blogs, authentication, bookmarks, comments, and user profiles in the application.
 
 ## Base URL
 ```
-http://<your-server-domain>/api/blog
+http://<your-server-domain>/api
 ```
 
 ---
 
-## 1. Create a New Blog Story
+## Blog APIs
 
-### Endpoint
+### 1. Create a New Blog Story
+
+**Endpoint:**
 ```
-POST /create-blog
+POST /blog/create-blog
 ```
 
-### Description
-Creates a new blog story with a title, content, tags, and an optional banner image.
+**Description:** Creates a new blog story with a title, content, tags, and an optional banner image.
 
-### Request Headers
+**Request Headers:**
  `Authorization`: Bearer `<JWT Token>`
 
-### Request Body (Form Data)
+**Request Body (Form Data):**
 | Field        | Type     | Required | Description                     |
 |--------------|----------|----------|---------------------------------|
 | `title`      | `string` | Yes      | Title of the blog.              |
@@ -30,7 +31,7 @@ Creates a new blog story with a title, content, tags, and an optional banner ima
 | `tags`       | `array`  | Yes      | Tags related to the blog.       |
 | `bannerImage`| `file`   | Optional | Banner image for the blog.      |
 
-### Response
+**Response:**
 ```json
 {
   "success": true,
@@ -52,23 +53,22 @@ Creates a new blog story with a title, content, tags, and an optional banner ima
 
 ---
 
-## 2. Get Blogs
+### 2. Get Blogs
 
-### Endpoint
+**Endpoint:**
 ```
-GET /get-blogs
+GET /blog/get-blogs
 ```
 
-### Description
-Fetches a paginated list of blogs.
+**Description:** Fetches a paginated list of blogs.
 
-### Query Parameters
+**Query Parameters:**
 | Parameter | Type     | Required | Description                     |
 |-----------|----------|----------|---------------------------------|
 | `page`    | `number` | Optional | Page number (default: 1).       |
 | `limit`   | `number` | Optional | Number of blogs per page (default: 10). |
 
-### Response
+**Response:**
 ```json
 {
   "success": true,
@@ -95,20 +95,19 @@ Fetches a paginated list of blogs.
 
 ---
 
-## 3. Edit Blog
+### 3. Edit Blog
 
-### Endpoint
+**Endpoint:**
 ```
-PUT /edit-blog
+PUT /blog/edit-blog
 ```
 
-### Description
-Edits an existing blog post.
+**Description:** Edits an existing blog post.
 
-### Request Headers
+**Request Headers:**
 - `Authorization`: Bearer `<JWT Token>`
 
-### Request Body (Form Data)
+**Request Body (Form Data):**
 | Field        | Type     | Required | Description                     |
 |--------------|----------|----------|---------------------------------|
 | `blogId`     | `string` | Yes      | ID of the blog to edit.         |
@@ -117,7 +116,7 @@ Edits an existing blog post.
 | `tags`       | `array`  | Optional | Updated tags for the blog.      |
 | `bannerImage`| `file`   | Optional | Updated banner image.           |
 
-### Response
+**Response:**
 ```json
 {
   "success": true,
@@ -138,25 +137,24 @@ Edits an existing blog post.
 
 ---
 
-## 4. Delete Blog
+### 4. Delete Blog
 
-### Endpoint
+**Endpoint:**
 ```
-DELETE /delete-blog/:id
+DELETE /blog/delete-blog/:id
 ```
 
-### Description
-Deletes a blog post.
+**Description:** Deletes a blog post.
 
-### Request Headers
+**Request Headers:**
 - `Authorization`: Bearer `<JWT Token>`
 
-### Path Parameters
+**Path Parameters:**
 | Parameter | Type     | Required | Description                     |
 |-----------|----------|----------|---------------------------------|
 | `id`      | `string` | Yes      | ID of the blog to delete.       |
 
-### Response
+**Response:**
 ```json
 {
   "success": true,
@@ -169,25 +167,24 @@ Deletes a blog post.
 
 ---
 
-## 5. Like/Unlike Blog
+### 5. Like/Unlike Blog
 
-### Endpoint
+**Endpoint:**
 ```
-PUT /like-unlike
+PUT /blog/like-unlike
 ```
 
-### Description
-Toggles the like status of a blog post.
+**Description:** Toggles the like status of a blog post.
 
-### Request Headers
+**Request Headers:**
 - `Authorization`: Bearer `<JWT Token>`
 
-### Request Body
+**Request Body:**
 | Field   | Type     | Required | Description                     |
 |---------|----------|----------|---------------------------------|
 | `blogId`| `string` | Yes      | ID of the blog to like/unlike.  |
 
-### Response
+**Response:**
 ```json
 {
   "success": true,
@@ -201,22 +198,21 @@ Toggles the like status of a blog post.
 
 ---
 
-## 6. Search Blogs
+### 6. Search Blogs
 
-### Endpoint
+**Endpoint:**
 ```
-GET /search
+GET /blog/search
 ```
 
-### Description
-Searches for blogs by title or tags.
+**Description:** Searches for blogs by title or tags.
 
-### Query Parameters
+**Query Parameters:**
 | Parameter | Type     | Required | Description                     |
 |-----------|----------|----------|---------------------------------|
 | `query`   | `string` | Yes      | Search query.                   |
 
-### Response
+**Response:**
 ```json
 {
   "success": true,
@@ -243,8 +239,283 @@ Searches for blogs by title or tags.
 
 ---
 
+## Authentication APIs
+
+### 1. Signup
+**Endpoint:**
+```
+POST /auth/signup
+```
+**Description:** Creates a new user account.
+**Request Body:**
+| Field     | Type     | Required | Description              |
+|-----------|----------|----------|--------------------------|
+| `name`    | `string` | Yes      | Full name of the user.   |
+| `email`   | `string` | Yes      | Email address.           |
+| `username`| `string` | Yes      | Unique username.         |
+| `password`| `string` | Yes      | Password for the account.|
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "User created successfully",
+  "token": "JWT Token",
+  "user": {
+    "id": "userId",
+    "name": "User Name",
+    "email": "user@example.com",
+    "username": "@username",
+    "role": "user"
+  }
+}
+```
+
+### 2. Login
+**Endpoint:**
+```
+POST /auth/login
+```
+**Description:** Logs in a user.
+**Request Body:**
+| Field     | Type     | Required | Description              |
+|-----------|----------|----------|--------------------------|
+| `email`   | `string` | Optional | Email address.           |
+| `username`| `string` | Optional | Username.                |
+| `password`| `string` | Yes      | Password for the account.|
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "token": "JWT Token",
+  "user": {
+    "id": "userId",
+    "name": "User Name",
+    "email": "user@example.com",
+    "username": "@username",
+    "role": "user"
+  }
+}
+```
+
+### 3. Logout
+**Endpoint:**
+```
+GET /auth/logout
+```
+**Description:** Logs out the user by clearing the session token.
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Logout successful"
+}
+```
+
+---
+
+## Bookmark APIs
+
+### 1. Add/Remove Bookmark
+**Endpoint:**
+```
+PUT /bookmark/add-remove
+```
+**Description:** Toggles the bookmark status of a blog post.
+**Request Body:**
+| Field   | Type     | Required | Description              |
+|---------|----------|----------|--------------------------|
+| `blogId`| `string` | Yes      | ID of the blog to bookmark/unbookmark.|
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Bookmark added/removed successfully",
+  "data": {
+    "id": "bookmarkId",
+    "blogId": "blogId",
+    "userId": "userId"
+  }
+}
+```
+
+### 2. Get All Bookmarks
+**Endpoint:**
+```
+GET /bookmark
+```
+**Description:** Fetches all bookmarks for the logged-in user.
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "bookmarkId",
+      "blogId": "blogId",
+      "title": "Blog Title",
+      "author": "Author Name",
+      "createdAt": "timestamp"
+    }
+  ]
+}
+```
+
+---
+
+## Comment APIs
+
+### 1. Create Comment
+**Endpoint:**
+```
+POST /comment
+```
+**Description:** Adds a new comment to a blog post.
+**Request Body:**
+| Field   | Type     | Required | Description              |
+|---------|----------|----------|--------------------------|
+| `blogId`| `string` | Yes      | ID of the blog to comment on.|
+| `content`| `string`| Yes      | Content of the comment.  |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Comment created successfully",
+  "data": {
+    "id": "commentId",
+    "content": "Comment content",
+    "author": "userId",
+    "createdAt": "timestamp"
+  }
+}
+```
+
+### 2. Fetch Comments
+**Endpoint:**
+```
+GET /comment/:blogId
+```
+**Description:** Fetches all comments for a specific blog post.
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "commentId",
+      "content": "Comment content",
+      "author": "Author Name",
+      "createdAt": "timestamp"
+    }
+  ]
+}
+```
+
+---
+
+## User APIs
+
+### 1. Get Profile
+**Endpoint:**
+```
+GET /user
+```
+**Description:** Fetches the profile of the logged-in user.
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "userId",
+    "name": "User Name",
+    "email": "user@example.com",
+    "username": "@username",
+    "bio": "User bio",
+    "followers": 10,
+    "following": 5
+  }
+}
+```
+
+### 2. Update Profile
+**Endpoint:**
+```
+PUT /user/update-profile
+```
+**Description:** Updates the profile of the logged-in user.
+**Request Body:**
+| Field       | Type     | Required | Description              |
+|-------------|----------|----------|--------------------------|
+| `name`      | `string` | Optional | Updated name.            |
+| `username`  | `string` | Optional | Updated username.        |
+| `bio`       | `string` | Optional | Updated bio.             |
+| `socialLinks`| `object`| Optional | Updated social links.    |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Profile updated successfully",
+  "data": {
+    "id": "userId",
+    "name": "Updated Name",
+    "username": "@updatedUsername",
+    "bio": "Updated bio"
+  }
+}
+```
+
+### 3. Change Password
+**Endpoint:**
+```
+PUT /user/change-password
+```
+**Description:** Changes the password of the logged-in user.
+**Request Body:**
+| Field         | Type     | Required | Description              |
+|---------------|----------|----------|--------------------------|
+| `oldPassword` | `string` | Yes      | Current password.        |
+| `newPassword` | `string` | Yes      | New password.            |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Password changed successfully"
+}
+```
+
+### 4. Follow/Unfollow User
+**Endpoint:**
+```
+PUT /user/follow-unfollow
+```
+**Description:** Toggles the follow status of another user.
+**Request Body:**
+| Field   | Type     | Required | Description              |
+|---------|----------|----------|--------------------------|
+| `userId`| `string` | Yes      | ID of the user to follow/unfollow.|
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Followed/Unfollowed successfully",
+  "data": {
+    "following": 5,
+    "followers": 10
+  }
+}
+```
+
+---
+
 ## Notes
 - All endpoints requiring authentication must include a valid JWT token in the `Authorization` header.
-- Ensure that the `bannerImage` file is uploaded as `multipart/form-data` where applicable.
+- Ensure that file uploads are sent as `multipart/form-data` where applicable.
 
 Feel free to reach out if you have any questions or need further clarification!
