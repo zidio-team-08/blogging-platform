@@ -11,11 +11,11 @@ export const createNewStory = async (req, res, next) => {
         if (!title || !content || !tags && !bannerImage) {
             return next(new errorHandler('Please provide all the fields', 400));
         }
-
+        const tagsArray = typeof tags === 'string' ? tags.split(',').map(tag => tag.trim()) : [];
         const newBlog = new blogModel({
             title,
             content,
-            tags,
+            tags: tagsArray,
             author: req.user.id,
         });
 

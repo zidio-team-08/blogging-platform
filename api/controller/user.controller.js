@@ -1,6 +1,6 @@
 import User from '../model/user.model.js';
 import { profile_image_upload } from '../utils/uploadImage.js';
-import { deleteFilesFromCloudinary } from '../../../talknet/api/utils/cloudinary.js';
+// import { deleteFilesFromCloudinary } from '../../../talknet/api/utils/cloudinary.js';
 import { errorHandler } from '../middleware/errorMiddleware.js';
 
 // Get user profile

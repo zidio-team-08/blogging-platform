@@ -4,6 +4,7 @@ import Select from 'react-select';
 import toast from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPageStep } from '../features/blogSlice';
+import axios from 'axios';
 
 const BlogPreview = () => {
 
@@ -61,6 +62,7 @@ const BlogPreview = () => {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
     const dropZoneRef = useRef(null);
+    const [bannerImage, setBannerImage] = useState(null);
 
     // Improved image validation and processing
     const validateAndProcessImage = useCallback((file) => {
@@ -92,6 +94,7 @@ const BlogPreview = () => {
     // Handle file input change
     const handleImageChange = useCallback((event) => {
         const file = event.target.files?.[0];
+        setBannerImage(event.target.files[0]);
         validateAndProcessImage(file);
     }, [validateAndProcessImage]);
 
@@ -143,37 +146,42 @@ const BlogPreview = () => {
         fileInputRef.current?.click();
     }, []);
 
+    const handleResponse = (response) => {
+        if (response && response.data && response.data.success !== undefined) {
+            return {
+                success: response.data.success,
+                message: response.data.message || '',
+            };
+        }
+        return { success: false, message: 'Unknown error' };
+    };
+    
+      
+
     // handle on public story 
     const onPublish = async () => {
         try {
             const formData = new FormData();
             formData.append('title', title);
             formData.append('content', content);
-            formData.append('tags', tags);
-            formData.append('image', imageUrl);
+            const tagValues = selectedOptions.map(option => option.value);
+            formData.append('tags', JSON.stringify(tagValues));
+             formData.append('bannerImage', bannerImage);
 
             console.log('formData', formData);
 
-            // const response = await fetchData({
-            //     url: '/api/blog/new',
-            //     method: 'POST',
-            //     data: formData,
-            //     headers: {
-            //         'Content-Type': 'multipart/form-data',
-            //     }
-            // });
-            // const { success, message } = handleResponse(response);
-            // if (success) {
-            //     toast.success('Story published successfully');
-            //     dispatch(setPageStep({ pageStep: 3 }));
-            // } else {
-            //     toast.error(message);
-            // }
+            const response = await axios.post('/api/blog/create-blog', formData);
+            const { success, message } = handleResponse(response);
+            if (success) {
+                toast.success('Story published successfully');
+                dispatch(setPageStep({ pageStep: 3 }));
+            } else {
+                toast.error(message);
+            }
         } catch (error) {
             toast.error(error.message || "Something went wrong");
         }
     }
-
 
     return (
             <div className='w-full max-w-6xl mx-auto min-sm:px-4'>
