@@ -1,5 +1,5 @@
 import express from 'express';
-import { blogLikeUnlike, createNewStory, deleteBlog, editStory, getBlogs } from '../controller/blog.controller.js';
+import { blogLikeUnlike, createNewStory, deleteBlog, editStory, getBlogs, searchBlog } from '../controller/blog.controller.js';
 import isAuth from '../middleware/authMiddleware.js';
 import { createBlogValidator } from '../validator/blog.validator.js';
 import { uploadProfile } from '../middleware/upload.js';
@@ -23,5 +23,8 @@ router.delete("/delete-blog/:id", isAuth, deleteBlog);
 
 // like blog
 router.put("/like-unlike", isAuth, blogLikeUnlike);
+
+// seach
+router.get('/search', searchBlog);
 
 export default router;

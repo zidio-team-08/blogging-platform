@@ -2,6 +2,17 @@ import blogModel from '../model/blog.model.js';
 import { blog_image_upload, deleteFilesFromCloudinary } from '../utils/uploadImage.js';
 import { errorHandler } from '../middleware/errorMiddleware.js';
 
+
+// senetize search query 
+const sanitizeQuery = (query) => {
+    if (typeof query !== 'string') return '';
+    return query
+        .trim()
+        .replace(/\s+/g, ' ')
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        .toLowerCase();
+}
+
 // create new blog story
 export const createNewStory = async (req, res, next) => {
     try {
@@ -194,6 +205,52 @@ export const blogLikeUnlike = async (req, res, next) => {
                 blogId: blog._id,
                 likes: blog.likes.length,
             },
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+// search blog
+export const searchBlog = async (req, res, next) => {
+    try {
+
+        const query = sanitizeQuery(req.query.query);
+
+        if (!query) return next(new errorHandler('Please provide query', 400));
+
+        const blogs = await blogModel.find({
+            $or: [
+                { title: { $regex: query, $options: 'i' } },
+                { tags: { $regex: query, $options: 'i' } },
+            ]
+        }).populate('author', 'name username profileImage').lean();
+
+        if (!blogs) return next(new errorHandler('No blogs found', 404));
+
+        const updated = blogs.map((blog) => {
+            return {
+                id: blog._id,
+                title: blog.title,
+                author: {
+                    id: blog.author._id,
+                    name: blog.author.name,
+                    username: blog.author.username,
+                    profileImage: blog.author.profileImage.url,
+                },
+                tags: blog.tags,
+                bannerImage: blog.bannerImage.url,
+                comments: blog.comments.length,
+                likes: blog.likes.length,
+                createdAt: blog.createdAt,
+                updatedAt: blog.updatedAt,
+            }
+        })
+
+        res.status(200).json({
+            success: true,
+            data: updated,
         });
 
     } catch (error) {
