@@ -6,6 +6,7 @@ const blogSchema = new mongoose.Schema({
         required: [true, 'Blog title is required'],
         trim: true,
         minlength: [5, 'Blog title must be at least 5 characters long'],
+        index: true,
     },
     content: {
         type: String,
@@ -21,6 +22,7 @@ const blogSchema = new mongoose.Schema({
     tags: [{
         type: String,
         trim: true,
+        index: true,
     }],
     bannerImage: {
         url: { type: String },
@@ -37,7 +39,6 @@ const blogSchema = new mongoose.Schema({
 }, {
     timestamps: true, versionKey: false
 });
-
 
 const Blog = mongoose.model('Blog', blogSchema);
 

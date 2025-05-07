@@ -2,6 +2,33 @@ import User from '../model/user.model.js';
 import { profile_image_upload } from '../utils/uploadImage.js';
 // import { deleteFilesFromCloudinary } from '../../../talknet/api/utils/cloudinary.js';
 import { errorHandler } from '../middleware/errorMiddleware.js';
+import blogModel from '../model/blog.model.js';
+import mongoose from 'mongoose';
+const { ObjectId } = mongoose.Types;
+
+// senetize search query 
+const sanitizeQuery = (query) => {
+    if (typeof query !== 'string') return '';
+    return query
+        .trim()
+        .replace(/\s+/g, '')
+        .replace(/[^a-zA-Z0-9@.]/g, '')
+        .toLowerCase();
+}
+
+const sanitizeUsername = (username) => {
+    if (typeof username !== 'string') return '';
+
+    if (!username.startsWith('@')) {
+        username = '@' + username;
+    }
+
+    return username
+        .trim()
+        .replace(/\s+/g, '')
+        .replace(/[^a-zA-Z0-9@._]/g, '')
+        .toLowerCase();
+}
 
 // Get user profile
 export const getProfile = async (req, res, next) => {
@@ -19,7 +46,7 @@ export const getProfile = async (req, res, next) => {
             role: user.role,
             following: user.following.length,
             followers: user.followers.length,
-            bookmarks: user.bookmarks,
+            // bookmarks: user.bookmarks,
         };
 
         if (user.profileImage?.url) {
@@ -93,7 +120,7 @@ export const updateProfile = async (req, res, next) => {
             role: user.role,
             following: user.following.length,
             followers: user.followers.length,
-            bookmarks: user.bookmarks,
+            // bookmarks: user.bookmarks,
         };
 
         if (user.profileImage?.url) {
@@ -235,6 +262,114 @@ export const followUnfollow = async (req, res, next) => {
         return next(error);
     }
 };
+
+// search user
+export const searchUser = async (req, res, next) => {
+    try {
+
+        const query = sanitizeQuery(req.query.query);
+
+        if (!query) return next(new errorHandler('Please provide search query', 400));
+
+        const page = req.query.page || 1;
+        const limit = req.query.limit || 10;
+        const skip = (page - 1) * limit;
+
+        if (page < 1) return next(new errorHandler('Page number cannot be less than 1', 400));
+        if (limit < 3) return next(new errorHandler('Limit cannot be less than 3', 400));
+        if (limit > 10) return next(new errorHandler('Limit cannot be greater than 10', 400));
+
+
+        const users = await User.find({
+            $or: [
+                { name: { $regex: query, $options: 'i' } },
+                { username: { $regex: query, $options: 'i' } },
+                { email: { $regex: query, $options: 'i' } }
+            ]
+        }).skip(skip).limit(limit).sort({ updatedAt: -1 }).lean();
+
+        if (!users) return next(new errorHandler('No users found', 404));
+
+        const updated = users.map((user) => {
+            return {
+                id: user._id,
+                name: user.name,
+                username: user.username,
+                profileImage: user?.profileImage?.url,
+                bio: user.bio
+            }
+        })
+
+        res.status(200).json({
+            success: true,
+            data: updated,
+        })
+
+    } catch (error) {
+        return next(error);
+    }
+}
+
+// get user details by username
+export const getUserDetailsByUsername = async (req, res, next) => {
+    try {
+
+        const sanitizedUsername = sanitizeUsername(req.params.username);
+
+        if (!sanitizedUsername) return next(new errorHandler('Please provide username', 400));
+
+        const user = await User.findOne({ username: sanitizedUsername }).lean();
+
+        if (!user) return next(new errorHandler('User not found', 404));
+
+        const blogs = await blogModel.find({ author: user._id }).lean();
+
+        let userData = {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            username: user.username,
+            bio: user.bio,
+            role: user.role,
+            following: user.following?.length,
+            followers: user.followers?.length,
+            isFollowing: user.followers.some(followerId =>
+                followerId.equals(new ObjectId(req.user.id))
+            ),
+        };
+
+        if (user.profileImage?.url) {
+            userData.profileImage = user.profileImage.url;
+        }
+
+        if (user.socialLinks) {
+            userData.socialLinks = user.socialLinks;
+        }
+
+        const updatedBlogs = blogs.map((blog) => {
+            return {
+                id: blog._id,
+                title: blog.title,
+                bannerImage: blog.bannerImage?.url,
+                comments: blog.comments.length,
+                likes: blog.likes.length,
+                createdAt: blog.createdAt,
+                updatedAt: blog.updatedAt,
+            }
+        })
+
+        res.status(200).json({
+            success: true,
+            data: {
+                user: userData,
+                blogs: updatedBlogs
+            },
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+}
 
 
 
