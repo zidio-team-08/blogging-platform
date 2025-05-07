@@ -57,10 +57,10 @@ const userSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
    }],
-   bookmarks: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Blog',
-   }],
+   // bookmarks: [{
+   //    type: mongoose.Schema.Types.ObjectId,
+   //    ref: 'Blog',
+   // }],
    socialLinks: {
       youtube: { type: String },
       instagram: { type: String },

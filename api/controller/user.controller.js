@@ -2,6 +2,9 @@ import User from '../model/user.model.js';
 import { profile_image_upload } from '../utils/uploadImage.js';
 import { deleteFilesFromCloudinary } from '../../../talknet/api/utils/cloudinary.js';
 import { errorHandler } from '../middleware/errorMiddleware.js';
+import blogModel from '../model/blog.model.js';
+import mongoose from 'mongoose';
+const { ObjectId } = mongoose.Types;
 
 // senetize search query 
 const sanitizeQuery = (query) => {
@@ -10,6 +13,20 @@ const sanitizeQuery = (query) => {
         .trim()
         .replace(/\s+/g, '')
         .replace(/[^a-zA-Z0-9@.]/g, '')
+        .toLowerCase();
+}
+
+const sanitizeUsername = (username) => {
+    if (typeof username !== 'string') return '';
+
+    if (!username.startsWith('@')) {
+        username = '@' + username;
+    }
+
+    return username
+        .trim()
+        .replace(/\s+/g, '')
+        .replace(/[^a-zA-Z0-9@._]/g, '')
         .toLowerCase();
 }
 
@@ -29,7 +46,7 @@ export const getProfile = async (req, res, next) => {
             role: user.role,
             following: user.following.length,
             followers: user.followers.length,
-            bookmarks: user.bookmarks,
+            // bookmarks: user.bookmarks,
         };
 
         if (user.profileImage?.url) {
@@ -103,7 +120,7 @@ export const updateProfile = async (req, res, next) => {
             role: user.role,
             following: user.following.length,
             followers: user.followers.length,
-            bookmarks: user.bookmarks,
+            // bookmarks: user.bookmarks,
         };
 
         if (user.profileImage?.url) {
@@ -293,7 +310,66 @@ export const searchUser = async (req, res, next) => {
     }
 }
 
-// 
+// get user details by username
+export const getUserDetailsByUsername = async (req, res, next) => {
+    try {
+
+        const sanitizedUsername = sanitizeUsername(req.params.username);
+
+        if (!sanitizedUsername) return next(new errorHandler('Please provide username', 400));
+
+        const user = await User.findOne({ username: sanitizedUsername }).lean();
+
+        if (!user) return next(new errorHandler('User not found', 404));
+
+        const blogs = await blogModel.find({ author: user._id }).lean();
+
+        let userData = {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            username: user.username,
+            bio: user.bio,
+            role: user.role,
+            following: user.following?.length,
+            followers: user.followers?.length,
+            isFollowing: user.followers.some(followerId =>
+                followerId.equals(new ObjectId(req.user.id))
+            ),
+        };
+
+        if (user.profileImage?.url) {
+            userData.profileImage = user.profileImage.url;
+        }
+
+        if (user.socialLinks) {
+            userData.socialLinks = user.socialLinks;
+        }
+
+        const updatedBlogs = blogs.map((blog) => {
+            return {
+                id: blog._id,
+                title: blog.title,
+                bannerImage: blog.bannerImage?.url,
+                comments: blog.comments.length,
+                likes: blog.likes.length,
+                createdAt: blog.createdAt,
+                updatedAt: blog.updatedAt,
+            }
+        })
+
+        res.status(200).json({
+            success: true,
+            data: {
+                user: userData,
+                blogs: updatedBlogs
+            },
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+}
 
 
 
