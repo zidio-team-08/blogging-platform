@@ -1,155 +1,202 @@
-import Blog from '../model/blog.data.js';
-import Comment from "../model/comment.js";
+import blogModel from '../model/blog.model.js';
+import { blog_image_upload, deleteFilesFromCloudinary } from '../utils/uploadImage.js';
+import { errorHandler } from '../middleware/errorMiddleware.js';
 
-// Create a new blog post
-export const createBlog = async (req, res) => {
-  try {
-    const { title, content, tags, image } = req.body;
+// create new blog story
+export const createNewStory = async (req, res, next) => {
+    try {
+        const { title, content, tags } = req.body;
+        const bannerImage = req.file;
 
-    const newBlog = new Blog({
-      title,
-      content,
-      tags,
-      image,
-      author: req.user._id, // Ensure middleware sets req.user
-    });
+        if (!title || !content || !tags && !bannerImage) {
+            return next(new errorHandler('Please provide all the fields', 400));
+        }
 
-    const savedBlog = await newBlog.save();
-    res.status(201).json(savedBlog);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to create blog', details: error.message });
-  }
-};
+        const newBlog = new blogModel({
+            title,
+            content,
+            tags,
+            author: req.user.id,
+        });
 
-// Get all blogs
-export const getAllBlogs = async (req, res) => {
-  try {
-    const blogs = await Blog.find().populate('author', 'username email');
-    res.status(200).json(blogs);
-    const likedByUser = req.user ? blog.likes.includes(req.user._id) : false;
+        const uploadResult = await blog_image_upload(bannerImage);
 
-    res.status(200).json({
-      ...blog.toObject(),
-      likesCount: blog.likes.length,
-      likedByUser
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch blogs', details: error.message });
-  }
-};
+        newBlog.bannerImage = {
+            url: uploadResult.secure_url,
+            public_id: uploadResult.public_id
+        };
 
-// Get single blog by ID
-export const getBlogById = async (req, res) => {
-  try {
-    const blog = await Blog.findById(req.params.id).populate('author', 'username email');
-    if (!blog) return res.status(404).json({ error: 'Blog not found' });
-    const likedByUser = req.user ? blog.likes.includes(req.user._id) : false;
+        await newBlog.save();
 
-    res.status(200).json({
-      ...blog.toObject(),
-      likesCount: blog.likes.length,
-      likedByUser
-    });
-    res.status(200).json(blog);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch blog', details: error.message });
-  }
-};
+        const blogData = {
+            id: newBlog._id,
+            title: newBlog.title,
+            content: newBlog.content,
+            tags: newBlog.tags,
+            author: newBlog.author,
+            bannerImage: newBlog.bannerImage.url,
+            likes: newBlog.likes.length,
+            comments: newBlog.comments.length,
+            createdAt: newBlog.createdAt,
+            updatedAt: newBlog.updatedAt,
+        };
 
-// Update a blog post
-export const updateBlog = async (req, res) => {
-  try {
-    const { id } = req.params;
+        res.status(201).json({
+            success: true,
+            message: 'Story created successfully',
+            data: blogData,
+        });
 
-    const blog = await Blog.findById(id);
-    if (!blog) return res.status(404).json({ error: 'Blog not found' });
-
-    if (String(blog.author) !== req.user._id.toString()) {
-      return res.status(403).json({ error: 'Unauthorized to update this blog' });
+    } catch (error) {
+        return next(error);
     }
-
-    const updatedBlog = await Blog.findByIdAndUpdate(id, req.body, { new: true });
-    res.status(200).json(updatedBlog);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to update blog', details: error.message });
-  }
 };
 
-// Delete a blog post
-export const deleteBlog = async (req, res) => {
-  try {
-    const { id } = req.params;
+export const getBlogs = async (req, res, next) => {
+    try {
 
-    const blog = await Blog.findById(id);
-    if (!blog) return res.status(404).json({ error: 'Blog not found' });
+        let query = req.query;
 
-    if (String(blog.author) !== req.user._id.toString()) {
-      return res.status(403).json({ error: 'Unauthorized to delete this blog' });
+        const page = query.page || 1;
+        const limit = query.limit || 10;
+        const skip = (page - 1) * limit;
+
+        if (page < 1) return next(new errorHandler('Page number cannot be less than 1', 400));
+
+        if (limit < 3) return next(new errorHandler('Limit cannot be less than 3', 400));
+
+        if (limit > 10) return next(new errorHandler('Limit cannot be greater than 10', 400));
+
+        const blogs = await blogModel.find().populate('author', 'name username profileImage').lean().skip(skip).limit(limit);
+
+        if (!blogs) return next(new errorHandler('No blogs found', 404));
+
+        res.status(200).json({
+            success: true,
+            data: blogs,
+            totalPages: Math.ceil(blogs.length / limit),
+        });
+
+    } catch (error) {
+        return next(error);
     }
-
-    await Blog.findByIdAndDelete(id);
-    res.status(200).json({ message: 'Blog deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to delete blog', details: error.message });
-  }
-};
-// comment section 
-export const addComment = async (req, res) => {
-  try {
-    const { content } = req.body;
-    const blogId = req.params.id;
-
-    if (!content) {
-      return res.status(400).json({ message: 'Comment content is required' });
-    }
-
-    const blog = await Blog.findById(blogId);
-    if (!blog) {
-      return res.status(404).json({ message: 'Blog not found' });
-    }
-    const comment = new Comment({
-      content,
-      author: req.user._id, // assuming you're using `protect` middleware to set req.user
-      blog: blogId,
-    });
-
-    await comment.save();
-    blog.comments.push(comment._id);
-    await blog.save();
-
-    res.status(201).json({ message: 'Comment added successfully', comment });
-  } catch (error) {
-    console.error("Error adding comment:", error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
 };
 
-// like ,unlike functionality
+// edit blog
+export const editStory = async (req, res, next) => {
+    try {
 
-export const toggleLike = async (req, res) => {
-  try {
-    const blogId = req.params.id;
-    const userId = req.user._id;
+        const { blogId, title, content, tags } = req.body;
 
-    const blog = await Blog.findById(blogId);
-    if (!blog) return res.status(404).json({ error: 'Blog not found' });
+        const bannerImage = req.file;
 
-    const hasLiked = blog.likes.includes(userId);
+        if (!blogId) return next(new errorHandler('Please provide blog id', 400));
 
-    if (hasLiked) {
-      blog.likes.pull(userId); // Unlike
-    } else {
-      blog.likes.push(userId); // Like
+        if (!title && !content && !tags)
+            return next(new errorHandler('Please provide at least one field to update', 400));
+
+        const blog = await blogModel.findById(blogId);
+
+        if (!blog) return next(new errorHandler('Blog not found', 404));
+
+        if (blog.author.toString() !== req.user.id) {
+            return next(new errorHandler('You are not authorized to edit this blog', 401));
+        }
+
+        if (bannerImage) {
+            if (blog.bannerImage.public_id) {
+                await deleteFilesFromCloudinary(blog.bannerImage.public_id);
+            }
+
+            const uploadResult = await blog_image_upload(bannerImage);
+
+            blog.bannerImage = {
+                url: uploadResult.secure_url,
+                public_id: uploadResult.public_id
+            };
+        }
+
+        blog.title = title;
+        blog.content = content;
+        blog.tags = tags;
+
+        await blog.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Post updated successfully',
+            data: blog,
+        });
+
+    } catch (error) {
+        return next(error);
     }
-
-    await blog.save();
-    res.status(200).json({
-      message: hasLiked ? 'Blog unliked' : 'Blog liked',
-      totalLikes: blog.likes.length,
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to toggle like', details: error.message });
-  }
 };
 
+// delete blog
+export const deleteBlog = async (req, res, next) => {
+    try {
+        const postId = req.params.id;
 
+        if (!postId) return next(new errorHandler('Please provide blog id', 400));
+
+        const post = await blogModel.findById(postId);
+
+        if (!post) return next(new errorHandler('Blog not found', 404));
+
+        if (post.author.toString() !== req.user.id) {
+            return next(new errorHandler('You are not authorized to delete this post', 401));
+        }
+
+        await blogModel.deleteOne({ _id: postId });
+
+        res.status(200).json({
+            success: true,
+            message: 'Post deleted successfully',
+            data: {
+                id: post._id,
+            },
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+// like and unlike blog
+export const blogLikeUnlike = async (req, res, next) => {
+    try {
+
+        const { blogId } = req.body;
+
+        if (!blogId) return next(new errorHandler('Please provide blog id', 400));
+
+        const blog = await blogModel.findById(blogId);
+
+        if (!blog) return next(new errorHandler('Blog not found', 404));
+
+        let msg = '';
+
+        if (blog.likes.includes(req.user.id)) {
+            blog.likes = blog.likes.filter(like => like.toString() !== req.user.id);
+            msg = 'Post unliked successfully';
+        } else {
+            blog.likes.push(req.user.id);
+            msg = 'Post liked successfully';
+        }
+
+        await blog.save();
+
+        res.status(200).json({
+            success: true,
+            message: msg,
+            data: {
+                blogId: blog._id,
+                likes: blog.likes.length,
+            },
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+}

@@ -39,7 +39,31 @@ const userSchema = new mongoose.Schema({
    active: {
       type: Boolean,
       default: true
-   }
+   },
+   bio: {
+      type: String,
+      trim: true,
+      maxlength: 250,
+      default: "Welcome to my blog"
+   },
+   following: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+   }],
+   followers: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+   }],
+   bookmarks: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Blog',
+   }],
+   socialLinks: {
+      youtube: { type: String },
+      instagram: { type: String },
+      facebook: { type: String },
+      twitter: { type: String },
+   },
 }, { timestamps: true, versionKey: false });
 
 // Hash password before saving

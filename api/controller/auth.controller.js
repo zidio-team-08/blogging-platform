@@ -1,51 +1,35 @@
 import User from "../model/user.model.js";
-import { validationResult } from 'express-validator';
+import { errorHandler } from '../middleware/errorMiddleware.js';
 
 // Signup Controller
-export const signup = async (req, res) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-        return res.status(422).json({
-            success: false,
-            message: errors.array()[0].msg,
-        });
-    }
-
-    const { name, email, username, password } = req.body;
-
-    if (!name || !email || !username || !password) {
-        return res.status(400).json({
-            success: false,
-            message: "All fields are required",
-        });
-    }
-
+export const signup = async (req, res, next) => {
     try {
+        const { name, email, username, password } = req.body;
 
-        // Check if user exists
-        const existing = await User.findOne({ $or: [{ email }, { username }] }).lean();
-
-        if (existing) {
-            if (existing.email == email) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Email already exists",
-                });
-            }
-            if (existing.username == username) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Username already exists",
-                });
-            }
+        if (!name || !email || !username || !password) {
+            return next(new errorHandler('Please provide all the fields', 400));
         }
+
+        // Normalize username (ensure it starts with @)
+        const normalizedUsername = username.startsWith('@') ? username : '@' + username;
+
+        // Check if email exists
+        const emailExists = await User.findOne({ email: email.toLowerCase() });
+        if (emailExists) {
+            return next(new errorHandler('Email already exists', 400));
+        }
+
+        // Check if username exists
+        const usernameExists = await User.findOne({
+            username: normalizedUsername.toLowerCase()
+        });
+        if (usernameExists) return next(new errorHandler('Username already exists', 400));
 
         // Create new user
         const newUser = new User({
             name,
-            email,
-            username,
+            email: email.toLowerCase(),
+            username: normalizedUsername.toLowerCase(),
             password,
         });
 
@@ -73,62 +57,28 @@ export const signup = async (req, res) => {
         });
 
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: error.message || "Internal Server Error",
-        });
+        return next(error);
     }
 };
 
 // Login Controller
-export const login = async (req, res) => {
-
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-        return res.status(422).json({
-            success: false,
-            message: errors.array()[0].msg,
-        });
-    }
-
-    // login with username and password or email and password
-    const { username, email, password } = req.body;
-
-    if (!username && !email) {
-        return res.status(400).json({
-            success: false,
-            message: "Email or Username is required",
-        });
-    }
-
-    if (!password) {
-        return res.status(400).json({
-            success: false,
-            message: "Password is required",
-        });
-    }
-
+export const login = async (req, res, next) => {
     try {
+        // login with username and password or email and password
+        const { username, email, password } = req.body;
+
+        if (!username && !email) return next(new errorHandler('Email or Username is required', 400));
+
+        if (!password) return next(new errorHandler('Password is required', 400));
 
         const user = await User.findOne({ $or: [{ email }, { username }] }).select("+password");
 
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found",
-            });
-        }
+        if (!user) return next(new errorHandler('User not found', 404));
 
         // Compare password
         const isMatch = await user.comparePassword(password);
 
-        if (!isMatch) {
-            return res.status(401).json({
-                success: false,
-                message: "Invalid password",
-            });
-        }
+        if (!isMatch) return next(new errorHandler('Invalid password', 401));
 
         const token = await user.generateToken();
 
@@ -153,10 +103,7 @@ export const login = async (req, res) => {
         });
 
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: error.message || "Internal Server Error",
-        });
+        return next(error);
     }
 };
 

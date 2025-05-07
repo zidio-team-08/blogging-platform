@@ -2,12 +2,14 @@
     --font-1: 'Poppins', sans-serif;
     --font-2: 'Outfit', sans-serif;
     --font-3: 'Open Sans', sans-serif;
+    --main-font: "Libre Franklin", sans-serif;
 }
 
 body {
     width: 100%;
     background-color: #ffffff;
-    font-family: "Open Sans", sans-serif;
+    font-family: var(--main-font);
+    /* font-family: "Open Sans", sans-serif; */
     /* F3F4F6 */
     /* fafafa */
 }
@@ -22,4 +24,8 @@ body {
 
 .font3 {
     font-family: var(--font-3);
+}
+
+.main-font{
+    font-family: var(--main-font);
 }

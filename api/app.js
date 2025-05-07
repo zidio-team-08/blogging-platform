@@ -4,12 +4,20 @@ dotenv.config();
 import express from "express";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
-import authRoute from "./routes/auth.route.js";
-import { limiter } from "./config/rate.limiter.js";
-import blogRoutes from "./routes/blog.routes.js";
 import helmet from "helmet";
 import cors from "cors";
- 
+
+import authRoute from "./routes/auth.route.js";
+import userRoutes from "./routes/user.route.js";
+import blogRoutes from './routes/blog.route.js';
+import commentRoutes from './routes/comment.route.js';
+import bookmarkRoutes from './routes/bookmark.route.js';
+
+import isAuth from './middleware/authMiddleware.js';
+
+import { errorMiddleware } from './middleware/errorMiddleware.js';
+import { limiter } from "./config/rate.limiter.js";
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -20,7 +28,6 @@ const corsOptions = {
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
 };
-
 
 //middleware
 app.use(express.json());
@@ -33,11 +40,18 @@ app.use(cors(corsOptions));
 connectDB();
 //Routes
 app.use("/api/auth", limiter, authRoute);
-app.use("/api/blogs",blogRoutes);
-app.use("/api/blogs/comment",blogRoutes);
+app.use("/api/user", isAuth, userRoutes);
+app.use("/api/blog", blogRoutes);
+app.use("/api/comment", isAuth, commentRoutes);
+app.use("/api/bookmark", isAuth, bookmarkRoutes);
+
+
 app.get('/', (req, res) => {
     res.send("Hello..!");
 });
+
+// Error handling middleware
+app.use(errorMiddleware);
 
 app.listen(PORT, () => {
     console.log(`Server is running at port ${PORT}`);

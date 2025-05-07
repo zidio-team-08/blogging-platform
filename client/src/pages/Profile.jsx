@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { FiEdit, FiUser, FiLock } from 'react-icons/fi'
 import { MdOutlineEmail } from 'react-icons/md'
 import { FaAt, FaFacebook, FaTwitter, FaYoutube, FaEye, FaEyeSlash } from 'react-icons/fa'
-import { GrInstagram } from "react-icons/gr";
+import { GrInstagram } from 'react-icons/gr';
 import toast from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux'
 import useAxios from '../hook/useAxios';
@@ -14,7 +14,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { setUser } from '../features/authSlice'
 
 const Profile = () => {
-    const [bio, setBio] = useState("This is a test profile.")
     const [imagePreview, setImagePreview] = useState("");
     const [imageFile, setImageFile] = useState(null);
     const [currentPasswordVisible, setCurrentPasswordVisible] = useState(false)
@@ -172,9 +171,6 @@ const Profile = () => {
             setImageLoading(false);
         }
     }
-
-    // console.log(watch("bio").length);
-
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8 min-h-[100vh] bg-base-100">
