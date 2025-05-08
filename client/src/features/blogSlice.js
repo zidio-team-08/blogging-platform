@@ -1,20 +1,19 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
     pageStep: 1,
     title: '',
     content: '',
     tags: [],
-    bannerImage: ''
+    bannerImage: null,
 }
 
 // slice
 const newStorySlice = createSlice({
-    name: "newStory",
+    name: 'newStory',
     initialState,
     reducers: {
         setPageStep: (state, action) => {
-            console.log('action', action);
             state.pageStep = action.payload.pageStep;
         },
         setTitle: (state, action) => {
@@ -26,11 +25,15 @@ const newStorySlice = createSlice({
         setTags: (state, action) => {
             state.tags = action.payload.tags;
         },
-        setBannerImage: (state, action) => {
-            state.bannerImage = action.payload.bannerImage;
+        clearNewSotry: (state) => {
+            state.pageStep = 1;
+            state.title = '';
+            state.content = '';
+            state.tags = [];
+            state.bannerImage = null;
         }
     }
 });
 
-export const { setPageStep, setTitle, setContent, setTags, setBannerImage } = newStorySlice.actions;
+export const { setPageStep, setTitle, setContent, setTags, clearNewSotry } = newStorySlice.actions;
 export default newStorySlice.reducer;

@@ -298,8 +298,8 @@ POST /blog/create-blog
 |--------------|----------|----------|---------------------------------|
 | `title`      | `string` | Yes      | Title of the blog.              |
 | `content`    | `string` | Yes      | Content of the blog.            |
-| `tags`       | `array`  | Yes      | Tags related to the blog.       |
-| `bannerImage`| `file`   | Optional | Banner image for the blog.      |
+| `tags`       | `array`  | Yes      | Tags related to the blog (1-5). |
+| `bannerImage`| `file`   | Yes      | Banner image for the blog.      |
 
 **Response:**
 ```json
@@ -344,6 +344,7 @@ GET /blog/get-blogs
       "content": "Blog Content",
       "tags": ["tag1", "tag2"],
       "author": {
+        "id": "authorId",
         "name": "Author Name",
         "username": "Author Username",
         "profileImage": "imageUrl"
@@ -380,7 +381,7 @@ PUT /blog/edit-blog
 ```json
 {
   "success": true,
-  "message": "Post updated successfully",
+  "message": "Blog updated successfully",
   "data": {
     "id": "blogId",
     "title": "Updated Title",

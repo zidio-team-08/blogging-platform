@@ -6,9 +6,6 @@ import { useSelector } from 'react-redux';
 const NewStory = () => {
     const { pageStep, title, content } = useSelector((state) => state.newStory);
 
-    console.log(title, content);
-
-
     const removeTag = (tagToRemove) => {
         setTags(tags.filter(tag => tag !== tagToRemove))
     }

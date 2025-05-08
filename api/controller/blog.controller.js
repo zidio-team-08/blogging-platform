@@ -16,18 +16,22 @@ const sanitizeQuery = (query) => {
 // create new blog story
 export const createNewStory = async (req, res, next) => {
     try {
-        const { title, content, tags } = req.body;
+        let { title, content, tags } = req.body;
         const bannerImage = req.file;
+
+        const newTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
 
         if (!title) return next(new errorHandler('Please provide title', 400));
         if (!content) return next(new errorHandler('Please provide content', 400));
-        if (!tags) return next(new errorHandler('Please provide tags', 400));
+        if (!newTags || newTags?.length <= 0) return next(new errorHandler('Please provide tags', 400));
+        if (newTags.length < 1) return next(new errorHandler('Please select at least one topic', 400));
+        if (newTags.length > 5) return next(new errorHandler('You can select up to 5 topics only', 400));
         if (!bannerImage) return next(new errorHandler('Please provide banner image', 400));
 
         const newBlog = new blogModel({
             title,
             content,
-            tags: JSON.parse(tags),
+            tags: newTags,
             author: req.user.id,
         });
 
@@ -83,10 +87,28 @@ export const getBlogs = async (req, res, next) => {
 
         if (!blogs) return next(new errorHandler('No blogs found', 404));
 
+        const updated = blogs.map((blog) => {
+            return {
+                id: blog._id,
+                title: blog.title,
+                author: {
+                    id: blog.author._id,
+                    name: blog.author.name,
+                    username: blog.author.username,
+                    profileImage: blog.author.profileImage.url,
+                },
+                tags: blog.tags,
+                bannerImage: blog.bannerImage.url,
+                comments: blog.comments.length,
+                likes: blog.likes.length,
+                createdAt: blog.createdAt,
+                updatedAt: blog.updatedAt,
+            }
+        });
+
         res.status(200).json({
             success: true,
-            data: blogs,
-            totalPages: Math.ceil(blogs.length / limit),
+            data: updated,
         });
 
     } catch (error) {
@@ -99,12 +121,13 @@ export const editStory = async (req, res, next) => {
     try {
 
         const { blogId, title, content, tags } = req.body;
-
         const bannerImage = req.file;
+
+        const newTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
 
         if (!blogId) return next(new errorHandler('Please provide blogId', 400));
 
-        if (!title && !content && !tags)
+        if (!title && !content && !newTags)
             return next(new errorHandler('Please provide at least one field to update', 400));
 
         const blog = await blogModel.findById(blogId);
@@ -130,7 +153,7 @@ export const editStory = async (req, res, next) => {
 
         if (title) blog.title = title;
         if (content) blog.content = content;
-        if (tags) blog.tags = Array.isArray(tags) ? tags : JSON.parse(tags);
+        if (tags) blog.tags = newTags;
 
         await blog.save();
 
