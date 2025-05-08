@@ -2,7 +2,7 @@ import { validationResult } from 'express-validator';
 
 const errorMiddleware = (error, req, res, next) => {
     const message = error.message || 'Internal Server Error';
-    const statusCode = error.statusCode || res.statusCode || error.status || 500;
+    const statusCode = error.statusCode || 500;
     const success = false;
 
     if (error.name == "CastError" && error.kind == "ObjectId") {
@@ -40,9 +40,12 @@ class errorHandler extends Error {
 const validateRequest = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return next(new errorHandler(errors.array()[0].msg, 400));
+        return res.status(400).json({
+            success: false,
+            message: errors.array()[0].msg,
+        });
     }
-    next();
+    return next();
 };
 
 

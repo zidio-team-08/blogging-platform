@@ -19,14 +19,15 @@ export const createNewStory = async (req, res, next) => {
         const { title, content, tags } = req.body;
         const bannerImage = req.file;
 
-        if (!title || !content || !tags && !bannerImage) {
-            return next(new errorHandler('Please provide all the fields', 400));
-        }
-        const tagsArray = typeof tags === 'string' ? tags.split(',').map(tag => tag.trim()) : [];
+        if (!title) return next(new errorHandler('Please provide title', 400));
+        if (!content) return next(new errorHandler('Please provide content', 400));
+        if (!tags) return next(new errorHandler('Please provide tags', 400));
+        if (!bannerImage) return next(new errorHandler('Please provide banner image', 400));
+
         const newBlog = new blogModel({
             title,
             content,
-            tags: tagsArray,
+            tags: JSON.parse(tags),
             author: req.user.id,
         });
 
@@ -101,7 +102,7 @@ export const editStory = async (req, res, next) => {
 
         const bannerImage = req.file;
 
-        if (!blogId) return next(new errorHandler('Please provide blog id', 400));
+        if (!blogId) return next(new errorHandler('Please provide blogId', 400));
 
         if (!title && !content && !tags)
             return next(new errorHandler('Please provide at least one field to update', 400));
@@ -127,16 +128,29 @@ export const editStory = async (req, res, next) => {
             };
         }
 
-        blog.title = title;
-        blog.content = content;
-        blog.tags = tags;
+        if (title) blog.title = title;
+        if (content) blog.content = content;
+        if (tags) blog.tags = Array.isArray(tags) ? tags : JSON.parse(tags);
 
         await blog.save();
 
+        const updatedData = {
+            id: blog._id,
+            title: blog.title,
+            content: blog.content,
+            tags: blog.tags,
+            author: blog.author,
+            bannerImage: blog.bannerImage.url,
+            likes: blog.likes.length,
+            comments: blog.comments.length,
+            createdAt: blog.createdAt,
+            updatedAt: blog.updatedAt,
+        };
+
         res.status(200).json({
             success: true,
-            message: 'Post updated successfully',
-            data: blog,
+            message: 'Blog updated successfully',
+            data: updatedData,
         });
 
     } catch (error) {
