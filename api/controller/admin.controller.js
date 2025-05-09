@@ -2,6 +2,7 @@ import adminModel from '../model/admin.model.js';
 import { errorHandler } from '../middleware/errorMiddleware.js';
 import User from '../model/user.model.js';
 import blogModel from '../model/blog.model.js';
+import { blog_image_upload, deleteFilesFromCloudinary } from '../utils/uploadImage.js';
 
 
 // senetize search query 
@@ -354,3 +355,191 @@ export const getUserDetailsById = async (req, res, next) => {
     }
 
 }
+
+// HANDLE ALL BLOG RELATED ACTIONS
+
+// get all blogs ====================== //
+export const getBlogs = async (req, res, next) => {
+    try {
+
+        let query = req.query;
+
+        const page = query.page || 1;
+        const limit = query.limit || 10;
+        const skip = (page - 1) * limit;
+
+        if (page < 1) return next(new errorHandler('Page number cannot be less than 1', 400));
+
+        if (limit < 3) return next(new errorHandler('Limit cannot be less than 3', 400));
+
+        if (limit > 10) return next(new errorHandler('Limit cannot be greater than 10', 400));
+
+        const blogs = await blogModel.find()
+            .populate('author', 'name username profileImage')
+            .sort({ createdAt: -1 }).lean().skip(skip).limit(limit);
+
+        if (!blogs) return next(new errorHandler('No blogs found', 404));
+
+        const updated = blogs.map((blog) => {
+            return {
+                id: blog._id,
+                title: blog.title,
+                author: {
+                    id: blog.author._id,
+                    name: blog.author.name,
+                    username: blog.author.username,
+                    profileImage: blog.author.profileImage.url,
+                },
+                tags: blog.tags,
+                bannerImage: blog.bannerImage.url,
+                comments: blog.comments.length,
+                likes: blog.likes.length,
+                createdAt: blog.createdAt,
+                updatedAt: blog.updatedAt,
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            data: updated,
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+// get blog details by id ====================== //
+export const getBlogDetailsById = async (req, res, next) => {
+    try {
+
+        const { blogId } = req.params;
+
+        if (!blogId) return next(new errorHandler('Please provide blogId', 400));
+
+        const blog = await blogModel.findById(blogId)
+            .populate('author', 'name username profileImage')
+            .lean();
+
+        if (!blog) return next(new errorHandler('Blog not found', 404));
+
+        const blogData = {
+            id: blog._id,
+            title: blog.title,
+            content: blog.content,
+            tags: blog.tags,
+            author: {
+                id: blog.author._id,
+                name: blog.author.name,
+                username: blog.author.username,
+                profileImage: blog.author.profileImage.url,
+            },
+            bannerImage: blog.bannerImage.url,
+            comments: blog.comments.length,
+            likes: blog.likes.length,
+            createdAt: blog.createdAt,
+            updatedAt: blog.updatedAt,
+        };
+
+        res.status(200).json({
+            success: true,
+            data: blogData,
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+// update blog ====================== //
+export const updateBlog = async (req, res, next) => {
+    try {
+
+        const { blogId, title, content, tags } = req.body;
+        const bannerImage = req.file;
+
+        const newTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
+
+        if (!blogId) return next(new errorHandler('Please provide blogId', 400));
+
+        if (!title && !content && !newTags)
+            return next(new errorHandler('Please provide at least one field to update', 400));
+
+        const blog = await blogModel.findById(blogId);
+
+        if (!blog) return next(new errorHandler('Blog not found', 404));
+
+
+        if (bannerImage) {
+            if (blog.bannerImage.public_id) {
+                await deleteFilesFromCloudinary(blog.bannerImage.public_id);
+            }
+
+            const uploadResult = await blog_image_upload(bannerImage);
+
+            blog.bannerImage = {
+                url: uploadResult.secure_url,
+                public_id: uploadResult.public_id
+            };
+        }
+
+        if (title) blog.title = title;
+        if (content) blog.content = content;
+        if (tags) blog.tags = newTags;
+
+        await blog.save();
+
+        const updatedData = {
+            id: blog._id,
+            title: blog.title,
+            content: blog.content,
+            tags: blog.tags,
+            author: blog.author,
+            bannerImage: blog.bannerImage.url,
+            likes: blog.likes.length,
+            comments: blog.comments.length,
+            createdAt: blog.createdAt,
+            updatedAt: blog.updatedAt,
+        };
+
+        res.status(200).json({
+            success: true,
+            message: 'Blog updated successfully',
+            data: updatedData,
+        });
+
+    } catch (error) {
+        console.log(error);
+        return next(error);
+    }
+}
+
+// delete blog ====================== //
+export const deleteBlog = async (req, res, next) => {
+    try {
+
+        const blogId = req.params.blogId;
+
+        if (!blogId) return next(new errorHandler('Please provide blogId', 400));
+
+        const blog = await blogModel.findById(blogId);
+
+        if (!blog) return next(new errorHandler('Blog not found', 404));
+
+        await blogModel.deleteOne({ _id: blogId });
+
+        res.status(200).json({
+            success: true,
+            message: 'Blog deleted successfully',
+            data: {
+                id: blog._id,
+            },
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+

@@ -485,6 +485,227 @@ GET /blog/search
 
 ---
 
+## Admin APIs
+
+### 1. Create Admin
+**Endpoint:**
+```
+POST /admin/create
+```
+**Description:** Creates a new admin account.
+**Request Body:**
+| Field     | Type     | Required | Description              |
+|-----------|----------|----------|--------------------------|
+| `name`    | `string` | Yes      | Full name of the admin.  |
+| `email`   | `string` | Yes      | Email address.           |
+| `password`| `string` | Yes      | Password for the account.|
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Admin created successfully",
+  "data": {
+    "id": "adminId",
+    "name": "Admin Name",
+    "email": "admin@example.com"
+  }
+}
+```
+
+### 2. Login Admin
+**Endpoint:**
+```
+POST /admin/auth/login
+```
+**Description:** Logs in an admin.
+**Request Body:**
+| Field     | Type     | Required | Description              |
+|-----------|----------|----------|--------------------------|
+| `email`   | `string` | Yes      | Email address.           |
+| `password`| `string` | Yes      | Password for the account.|
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "token": "JWT Token",
+  "data": {
+    "id": "adminId",
+    "name": "Admin Name",
+    "email": "admin@example.com"
+  }
+}
+```
+
+### 3. Logout Admin
+**Endpoint:**
+```
+GET /admin/auth/logout
+```
+**Description:** Logs out the admin by clearing the session token.
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Logout successful"
+}
+```
+
+### 4. Get Admin Profile
+**Endpoint:**
+```
+GET /admin/profile
+```
+**Description:** Fetches the profile of the logged-in admin.
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "adminId",
+    "name": "Admin Name",
+    "email": "admin@example.com"
+  }
+}
+```
+
+### 5. Get Dashboard Stats
+**Endpoint:**
+```
+GET /admin/dashboard-stats
+```
+**Description:** Fetches statistics for the admin dashboard.
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "totalUsers": 100,
+    "totalBlogs": 50,
+    "totalComments": 200
+  }
+}
+```
+
+### 6. Fetch Users
+**Endpoint:**
+```
+GET /admin/users
+```
+**Description:** Fetches a list of all users.
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "userId",
+      "name": "User Name",
+      "email": "user@example.com",
+      "username": "@username",
+      "role": "user"
+    }
+  ]
+}
+```
+
+### 7. Block/Unblock User
+**Endpoint:**
+```
+PUT /admin/user/block-unblock-user
+```
+**Description:** Toggles the block status of a user.
+**Request Body:**
+| Field   | Type     | Required | Description              |
+|---------|----------|----------|--------------------------|
+| `userId`| `string` | Yes      | ID of the user to block/unblock.|
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "User blocked/unblocked successfully"
+}
+```
+
+### 8. Get User Details by ID
+**Endpoint:**
+```
+GET /admin/user/:userId
+```
+**Description:** Fetches the details of a user by their ID.
+**Path Parameters:**
+| Parameter | Type     | Required | Description              |
+|-----------|----------|----------|--------------------------|
+| `userId`  | `string` | Yes      | ID of the user.          |
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "userId",
+    "name": "User Name",
+    "email": "user@example.com",
+    "username": "@username",
+    "role": "user"
+  }
+}
+```
+
+### 9. Update Blog
+**Endpoint:**
+```
+PUT /admin/blog/update-blog
+```
+**Description:** Updates a blog post.
+**Request Body (Form Data):**
+| Field        | Type     | Required | Description                     |
+|--------------|----------|----------|---------------------------------|
+| `blogId`     | `string` | Yes      | ID of the blog to update.       |
+| `title`      | `string` | Optional | Updated title of the blog.      |
+| `content`    | `string` | Optional | Updated content of the blog.    |
+| `tags`       | `array`  | Optional | Updated tags for the blog.      |
+| `bannerImage`| `file`   | Optional | Updated banner image.           |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Blog updated successfully",
+  "data": {
+    "id": "blogId",
+    "title": "Updated Title",
+    "content": "Updated Content",
+    "tags": ["tag1", "tag2"],
+    "bannerImage": "imageUrl"
+  }
+}
+```
+
+### 10. Delete Blog
+**Endpoint:**
+```
+DELETE /admin/blog/delete/:blogId
+```
+**Description:** Deletes a blog post.
+**Path Parameters:**
+| Parameter | Type     | Required | Description                     |
+|-----------|----------|----------|---------------------------------|
+| `blogId`  | `string` | Yes      | ID of the blog to delete.       |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Blog deleted successfully"
+}
+```
+
+---
+
 ## Notes
 - All endpoints requiring authentication must include a valid JWT token in the `Authorization` header.
 - Ensure that file uploads are sent as `multipart/form-data` where applicable.

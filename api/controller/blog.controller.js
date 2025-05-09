@@ -83,7 +83,9 @@ export const getBlogs = async (req, res, next) => {
 
         if (limit > 10) return next(new errorHandler('Limit cannot be greater than 10', 400));
 
-        const blogs = await blogModel.find().populate('author', 'name username profileImage').lean().skip(skip).limit(limit);
+        const blogs = await blogModel.find()
+            .sort({ createdAt: -1 }).populate('author', 'name username profileImage')
+            .lean().skip(skip).limit(limit);
 
         if (!blogs) return next(new errorHandler('No blogs found', 404));
 
