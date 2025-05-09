@@ -75,6 +75,10 @@ export const login = async (req, res, next) => {
 
         if (!user) return next(new errorHandler('User not found', 404));
 
+        if (user.role === 'admin') return next(new errorHandler('Admin login is not allowed', 401));
+
+        if (!user.active) return next(new errorHandler('Your account has been deactivated. Please contact admin.', 401));
+
         // Compare password
         const isMatch = await user.comparePassword(password);
 

@@ -12,6 +12,7 @@ import userRoutes from "./routes/user.route.js";
 import blogRoutes from './routes/blog.route.js';
 import commentRoutes from './routes/comment.route.js';
 import bookmarkRoutes from './routes/bookmark.route.js';
+import adminRoutes from './routes/admin.route.js';
 
 import isAuth from './middleware/authMiddleware.js';
 
@@ -44,6 +45,9 @@ app.use("/api/user", isAuth, userRoutes);
 app.use("/api/blog", blogRoutes);
 app.use("/api/comment", isAuth, commentRoutes);
 app.use("/api/bookmark", isAuth, bookmarkRoutes);
+
+// admin
+app.use("/api/admin", adminRoutes);
 
 
 app.get('/', (req, res) => {
