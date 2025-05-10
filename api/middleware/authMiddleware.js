@@ -32,7 +32,9 @@ const isAuth = asyncHandler(async (req, res, next) => {
             throw new Error('Unauthorized access. Please login.');
         }
         // Set user in request
-        req.user = decoded;
+        // req.user = decoded;
+        req.user = user;
+
         next();
     } catch (error) {
         console.log(error);

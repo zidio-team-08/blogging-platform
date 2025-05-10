@@ -68,6 +68,8 @@ export const createNewStory = async (req, res, next) => {
     }
 };
 
+// show all the blogs
+
 export const getBlogs = async (req, res, next) => {
     try {
 
@@ -87,26 +89,82 @@ export const getBlogs = async (req, res, next) => {
             .sort({ createdAt: -1 }).populate('author', 'name username profileImage')
             .lean().skip(skip).limit(limit);
 
-        if (!blogs) return next(new errorHandler('No blogs found', 404));
+        if (!blogs || blogs.length === 0) return next(new errorHandler('No blogs found', 404));
 
         const updated = blogs.map((blog) => {
             return {
                 id: blog._id,
                 title: blog.title,
                 author: {
-                    id: blog.author._id,
-                    name: blog.author.name,
-                    username: blog.author.username,
-                    profileImage: blog.author.profileImage.url,
+                    id: blog.author?._id || null,
+                    name: blog.author?.name || "Unknown",
+                    username: blog.author?.username || "unknown",
+                    profileImage: blog.author?.profileImage?.url || null,
                 },
-                tags: blog.tags,
-                bannerImage: blog.bannerImage.url,
-                comments: blog.comments.length,
-                likes: blog.likes.length,
+                tags: blog.tags || [],
+                bannerImage: blog.bannerImage?.url || null,
+                comments: blog.comments?.length || 0,
+                likes: blog.likes?.length || 0,
                 createdAt: blog.createdAt,
                 updatedAt: blog.updatedAt,
-            }
+            };
         });
+        
+
+        res.status(200).json({
+            success: true,
+            data: updated,
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+// show only user blogs for my stories
+export const getUserBlogs = async (req, res, next) => {
+    try {
+
+        let query = req.query;
+
+        const page = query.page || 1;
+        const limit = query.limit || 10;
+        const skip = (page - 1) * limit;
+
+        if (page < 1) return next(new errorHandler('Page number cannot be less than 1', 400));
+
+        if (limit < 3) return next(new errorHandler('Limit cannot be less than 3', 400));
+
+        if (limit > 10) return next(new errorHandler('Limit cannot be greater than 10', 400));
+
+        const blogs = await blogModel
+        .find({ author: req.user._id })
+        .populate('author', 'name username profileImage')
+        .lean()
+        .skip(skip)
+        .limit(limit);
+
+        if (!blogs || blogs.length === 0) return next(new errorHandler('No blogs found', 404));
+        
+        const updated = blogs.map((blog) => {
+            return {
+                id: blog._id,
+                title: blog.title,
+                author: {
+                    id: blog.author?._id || null,
+                    name: blog.author?.name || "Unknown",
+                    username: blog.author?.username || "unknown",
+                    profileImage: blog.author?.profileImage?.url || null,
+                },
+                tags: blog.tags || [],
+                bannerImage: blog.bannerImage?.url || null,
+                comments: blog.comments?.length || 0,
+                likes: blog.likes?.length || 0,
+                createdAt: blog.createdAt,
+                updatedAt: blog.updatedAt,
+            };
+        });
+        
 
         res.status(200).json({
             success: true,

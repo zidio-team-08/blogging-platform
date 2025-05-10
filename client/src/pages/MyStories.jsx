@@ -1,8 +1,32 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const MyStories = () => {
     const [activeTab, setActiveTab] = useState("drafts");
+    const [stories, setStories] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const token = localStorage.getItem("token");
+    useEffect(() => {
+        const fetchStories = async () => {
+            try {
+                const response = await axios.get('/api/blog/mystories', {
+                    withCredentials: true, // if you're using cookies for auth
+                    headers: token ? {
+                        'Authorization': `Bearer ${token}`,
+                    } : {},
+                });
+                setStories(response.data.data);
+                setLoading(false);
+            } catch (err) {
+                setError("Failed to load stories.");
+                setLoading(false);
+            }
+        };
+
+        fetchStories();
+    }, []);
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
@@ -29,43 +53,39 @@ const MyStories = () => {
                 </nav>
             </div>
 
-            <div className="space-y-4 md:space-y-6">
-                <div className="py-3 md:py-4 border-b border-base-300 flex flex-col md:flex-row gap-4">
-                    <div className="flex-grow">
-                        <h2 className="text-lg md:text-xl font-medium text-base-content mb-1">This is a testing</h2>
-                        <div className="flex flex-wrap items-center text-xs md:text-sm text-base-content">
-                            <span>Created 2 days ago</span>
+            {loading ? (
+                <p>Loading stories...</p>
+            ) : error ? (
+                <p className="text-red-500">{error}</p>
+            ) : stories.length === 0 ? (
+                <p>No stories found.</p>
+            ) : (
+                <div className="space-y-4 md:space-y-6">
+                    {stories.map((story) => (
+                        <div key={story.id} className="py-3 md:py-4 border-b border-base-300 flex flex-col md:flex-row gap-4">
+                            <div className="flex-grow">
+                                <h2 className="text-lg md:text-xl font-medium text-base-content mb-1">
+                                    {story.title}
+                                </h2>
+                                <div className="flex flex-wrap items-center text-xs md:text-sm text-base-content">
+                                    <span>Created {new Date(story.createdAt).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                            {story.bannerImage && (
+                                <div className="w-full md:w-24 h-20 rounded-sm overflow-hidden flex-shrink-0">
+                                    <img
+                                        src={story.bannerImage}
+                                        alt="Story cover"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            )}
                         </div>
-                    </div>
-                    <div className="w-full md:w-24 h-20 rounded-sm overflow-hidden flex-shrink-0">
-                        <img
-                            src="https://images.unsplash.com/photo-1633356122544-f134324a6cee"
-                            alt="Story cover"
-                            className="w-full h-full object-cover"
-                        />
-                    </div>
+                    ))}
                 </div>
-
-                <div className="py-3 md:py-4 border-b border-base-300 flex flex-col md:flex-row gap-4">
-                    <div className="flex-grow">
-                        <h2 className="text-lg md:text-xl font-medium text-base-content mb-1">This is a testing</h2>
-                        <div className="flex flex-wrap items-center text-xs md:text-sm text-base-content">
-                            <span>Created 2 days ago</span>
-                        </div>
-                    </div>
-                    <div className="w-full md:w-24 h-20 rounded-sm overflow-hidden flex-shrink-0">
-                        <img
-                            src="https://images.unsplash.com/photo-1633356122544-f134324a6cee"
-                            alt="Story cover"
-                            className="w-full h-full object-cover"
-                        />
-                    </div>
-                </div>
-
-          
-            </div>
+            )}
         </div>
-    )
-}
+    );
+};
 
-export default MyStories
+export default MyStories;
