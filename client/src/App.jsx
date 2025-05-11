@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react'
+import React, { lazy, Suspense, useEffect, useState } from 'react'
 import './App.css'
 import { Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -10,8 +10,6 @@ const Blog = lazy(() => import("./pages/Blog"));
 const NewStory = lazy(() => import("./pages/NewStory"));
 import ProtectedRoutes from './ProtectedRoutes';
 import AdminRoutes from './AdminRoutes';
-// import AdminUsers from './pages/admin/AdminUsers';
-// import AdminDashboard from './pages/admin/AdminDashboard';
 const Profile = lazy(() => import("./pages/Profile"));
 const MyStories = lazy(() => import("./pages/MyStories"));
 const Saved = lazy(() => import("./pages/Saved"));
@@ -24,7 +22,12 @@ const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const App = () => {
 
     // React Query
-    const queryClient = new QueryClient()
+    const queryClient = new QueryClient();
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+    }, [theme]);
 
     return (
         <QueryClientProvider client={queryClient}>

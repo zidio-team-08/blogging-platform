@@ -5,7 +5,7 @@ import * as yup from 'yup';
 import { FiLock } from 'react-icons/fi';
 import { MdOutlineMail } from 'react-icons/md';
 import { FaEye, FaEyeSlash } from 'react-icons/fa6';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useAxios from '../../hook/useAxios';
 import { handleResponse } from '../../utils/responseHandler';
 import toast from 'react-hot-toast';
@@ -104,6 +104,7 @@ const AdminLogin = () => {
                     >
                         {loading ? <span className="loading loading-spinner"></span> : 'Sign In'}
                     </button>
+                    {/* <Link to="/admin" className="text-sm font-semibold text-primary">Go to Homepage</Link> */}
                 </form>
             </div>
         </div>

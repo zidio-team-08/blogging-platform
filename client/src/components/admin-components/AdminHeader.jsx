@@ -27,7 +27,7 @@ const AdminHeader = () => {
     return (
 
         <>
-            <header className="w-full bg-base-100/80 h-16 border-b border-base-300 px-4 md:px-6 flex items-center justify-between sticky top-0 z-20 backdrop-blur-xl">
+            <header className="w-full bg-base-100/80 backdrop-blur-md h-16 border-b border-base-300 px-4 md:px-6 flex items-center justify-between sticky top-0 z-20">
                 <button
                     className="p-2 rounded-full hidden max-xl:block cursor-pointer hover:bg-base-300"
                     onClick={toggleSidebar}>{isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
