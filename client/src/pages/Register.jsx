@@ -62,7 +62,7 @@ const Register = () => {
     return (
         <div className='w-full min-h-screen flex items-center justify-center bg-base-300'>
             <div className="w-[95%] sm:max-w-md bg-base-100 rounded-md shadow-sm p-4 flex items-center justify-center flex-col">
-                <h2 className="text-center text-zinc-800 text-xl font-bold my-2 uppercase">Create Account</h2>
+                <h2 className="text-center text-base-content text-xl font-bold my-2 uppercase">Create Account</h2>
                 <form method="post" onSubmit={handleSubmit(onSubmit)} className='w-full p-2'>
                     <div className='w-full input focus-within:outline-none focus-within:border-primary my-2'>
                         <span className="px-1"><FiUser size={16} /></span>
@@ -110,8 +110,8 @@ const Register = () => {
                             autoComplete='off'
                         />
                         {
-                            passwordVisible ? <span onClick={() => setPasswordVisible(false)} className='cursor-pointer absolute right-3 p-2 rounded-full hover:bg-gray-100'><FaEye size={16} /></span> :
-                                <span onClick={() => setPasswordVisible(true)} className='cursor-pointer absolute right-3 p-2 rounded-full hover:bg-gray-100'><FaEyeSlash size={16} /></span>
+                            passwordVisible ? <span onClick={() => setPasswordVisible(false)} className='cursor-pointer absolute right-3 p-2 rounded-full hover:bg-base-200'><FaEye size={16} /></span> :
+                                <span onClick={() => setPasswordVisible(true)} className='cursor-pointer absolute right-3 p-2 rounded-full hover:bg-base-200'><FaEyeSlash size={16} /></span>
                         }
                     </div>
                     {errors.password && <p className="text-error text-[13px] font-semibold">{errors.password.message}</p>}

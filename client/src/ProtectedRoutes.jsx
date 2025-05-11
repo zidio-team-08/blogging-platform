@@ -43,7 +43,7 @@ const ProtectedRoutes = ({ children }) => {
     }, []);
 
     if (loading) {
-        return <div className='w-full h-screen flex items-center justify-center'>
+        return <div className='w-full h-screen bg-base-100 flex items-center justify-center'>
             <Loader />
         </div>
     }

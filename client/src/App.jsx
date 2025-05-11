@@ -9,9 +9,17 @@ const Login = lazy(() => import("./pages/Login"));
 const Blog = lazy(() => import("./pages/Blog"));
 const NewStory = lazy(() => import("./pages/NewStory"));
 import ProtectedRoutes from './ProtectedRoutes';
+import AdminRoutes from './AdminRoutes';
+// import AdminUsers from './pages/admin/AdminUsers';
+// import AdminDashboard from './pages/admin/AdminDashboard';
 const Profile = lazy(() => import("./pages/Profile"));
 const MyStories = lazy(() => import("./pages/MyStories"));
 const Saved = lazy(() => import("./pages/Saved"));
+
+// admin panel routes
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 
 const App = () => {
 
@@ -21,7 +29,7 @@ const App = () => {
     return (
         <QueryClientProvider client={queryClient}>
             <Suspense fallback={
-                <div className='w-full h-screen flex items-center justify-center'>
+                <div className='w-full h-screen flex items-center justify-center bg-base-100'>
                     <Loader />
                 </div>
             }>
@@ -55,6 +63,23 @@ const App = () => {
                         <ProtectedRoutes>
                             <Saved />
                         </ProtectedRoutes>
+                    } />
+
+                    {/* admin panel routes */}
+                    <Route path='/admin/login' element={
+                        <AdminLogin />
+                    } />
+
+                    <Route path='/admin' element={
+                        <AdminRoutes>
+                            <AdminDashboard />
+                        </AdminRoutes>
+                    } />
+
+                    <Route path='/admin/users' element={
+                        <AdminRoutes>
+                            <AdminUsers />
+                        </AdminRoutes>
                     } />
 
                 </Routes>
