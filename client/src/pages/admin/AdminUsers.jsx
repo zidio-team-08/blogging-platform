@@ -5,6 +5,8 @@ import AdminHeader from '../../components/admin-components/AdminHeader'
 import { FiSearch, FiEdit, FiTrash2 } from 'react-icons/fi';
 import { MdBlock } from 'react-icons/md';
 import SearchUserInput from '../../components/admin-components/SearchUserInput';
+import Confirm from '../../components/modal/Confirm';
+import UserEditModal from '../../components/modal/UserEditModal';
 
 
 const allusers = [
@@ -28,17 +30,10 @@ const AdminUsers = () => {
     const [searchTerm, setSearchTerm] = useState('')
     const [currentPage, setCurrentPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1)
-    const usersPerPage = 10
-
-    // useEffect(() => {
-    //   // Mock data - replace with actual API calls
-    //   setTimeout(() => {
-    //     const mockUsers =
-    //     setUsers(mockUsers)
-    //     setTotalPages(Math.ceil(mockUsers.length / usersPerPage))
-    //     setLoading(false)
-    //   }, 1000)
-    // }, [])
+    const usersPerPage = 10;
+    const [showModel, setShowModel] = useState(false);
+    const [showEditModel, setShowEditModel] = useState(false);
+    const [selectedUser, setSelectedUser] = useState("");
 
     // Filter users based on search term
     const filteredUsers = users.filter(user =>
@@ -57,20 +52,26 @@ const AdminUsers = () => {
     }
 
     // Handle page change
-    const paginate = (pageNumber) => setCurrentPage(pageNumber)
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    // blockUserhandler
+    // const blockUserhandler = () => {
+    // }
+
+    const blockUserhandler = () => {
+        setShowModel(false)
+    }
 
     return (
-        <div className="w-full h-full bg-base-100">
+        <div className="w-full h-full">
             <div className="flex flex-col md:flex-row">
                 <div className="flex-1 xl:ml-64 p-3 sm:p-4 md:p-6 overflow-auto">
                     <div className="mb-4 sm:mb-6">
                         <h1 className="text-xl sm:text-md capitalize font-bold text-base-content">Users Management</h1>
-                        <p className="text-primary-content/50 text-sm mt-1">Manage all users in the system</p>
+                        <p className="text-base-content/80 text-sm mt-1 font-semibold">Manage all users in the system</p>
                     </div>
-
                     {/* Search and Filter */}
                     <SearchUserInput />
-
                     {loading ? (
                         <div className="flex justify-center items-center h-64">
                             <div className="loading loading-spinner loading-lg"></div>
@@ -78,16 +79,16 @@ const AdminUsers = () => {
                     ) : (
                         <>
                             {/* Users Table */}
-                            <div className="bg-base-100 rounded-lg shadow-md overflow-hidden">
+                            <div className="bg-base-100 rounded-sm border border-base-300 overflow-hidden">
                                 <div className="overflow-x-auto">
                                     <table className="min-w-full divide-y divide-base-300">
-                                        <thead className="bg-base-200">
+                                        <thead className="bg-base-100">
                                             <tr>
-                                                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-base-content uppercase tracking-wider">User</th>
-                                                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-base-content uppercase tracking-wider">Email</th>
-                                                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-base-content uppercase tracking-wider">Joined</th>
-                                                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-base-content uppercase tracking-wider">Status</th>
-                                                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-base-content uppercase tracking-wider">Actions</th>
+                                                <th className="px-3 sm:px-6 py-2 sm:py-4 text-left text-xs font-semibold text-base-content capitalize tracking-wider">User</th>
+                                                <th className="px-3 sm:px-6 py-2 sm:py-4 text-left text-xs font-semibold text-base-content capitalize tracking-wider">Email</th>
+                                                <th className="px-3 sm:px-6 py-2 sm:py-4 text-left text-xs font-semibold text-base-content capitalize tracking-wider">Joined</th>
+                                                <th className="px-3 sm:px-6 py-2 sm:py-4 text-left text-xs font-semibold text-base-content capitalize tracking-wider">Status</th>
+                                                <th className="px-3 sm:px-6 py-2 sm:py-4 text-left text-xs font-semibold text-base-content capitalize tracking-wider">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody className="bg-base-100 divide-y divide-base-300">
@@ -122,12 +123,18 @@ const AdminUsers = () => {
                                                         <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
                                                             <div className="flex space-x-2">
                                                                 <div className='tooltip' data-tip="Edit User">
-                                                                    <button className="text-blue-600 cursor-pointer hover:bg-base-300 p-2 rounded-sm">
+                                                                    <button onClick={() => {
+                                                                        setSelectedUser(user);
+                                                                        setShowEditModel(true);
+                                                                    }} type='button' className="text-blue-600 cursor-pointer hover:bg-base-300 p-2 rounded-sm">
                                                                         <FiEdit size={16} />
                                                                     </button>
                                                                 </div>
                                                                 <div className="tooltip" data-tip="Block User">
-                                                                    <button type='button' data-tooltip-id='block-user-tooltip' className="text-red-600 cursor-pointer hover:bg-base-300 p-2 rounded-sm">
+                                                                    <button onClick={() => {
+                                                                        setSelectedUser(user);
+                                                                        setShowModel(true);
+                                                                    }} type='button' data-tooltip-id='block-user-tooltip' className="text-red-600 cursor-pointer hover:bg-base-300 p-2 rounded-sm">
                                                                         <MdBlock size={16} />
                                                                     </button>
                                                                 </div>
@@ -154,7 +161,7 @@ const AdminUsers = () => {
                                         <button
                                             className="join-item btn btn-sm"
                                             onClick={() => paginate(Math.max(1, currentPage - 1))}
-                                            disabled={currentPage === 1}
+                                        // disabled={currentPage === 1}
                                         >
                                             «
                                         </button>
@@ -162,15 +169,14 @@ const AdminUsers = () => {
                                             <button
                                                 key={number + 1}
                                                 onClick={() => paginate(number + 1)}
-                                                className={`join-item btn btn-sm ${currentPage === number + 1 ? 'btn-active' : ''}`}
-                                            >
+                                                className={`join-item btn btn-sm ${currentPage === number + 1 ? 'btn-active' : ''}`}>
                                                 {number + 1}
                                             </button>
                                         ))}
                                         <button
                                             className="join-item btn btn-sm"
                                             onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
-                                            disabled={currentPage === totalPages}
+                                        // disabled={currentPage === totalPages}
                                         >
                                             »
                                         </button>
@@ -181,6 +187,22 @@ const AdminUsers = () => {
                     )}
                 </div>
             </div>
+
+            {/*  */}
+            <UserEditModal
+                showEditModel={showEditModel}
+                setShowEditModel={setShowEditModel}
+                selectedUser={selectedUser}
+                setSelectedUser={setSelectedUser} />
+            <Confirm
+                showModel={showModel}
+                setShowModel={setShowModel}
+                selectedUser={selectedUser}
+                setSelectedUser={setSelectedUser}
+                title="Confirmation Required"
+                message="Are you sure you want to block this user?"
+                className='text-white hover:bg-red-600 bg-red-500'
+                onConfirm={blockUserhandler} />
         </div>
     )
 }

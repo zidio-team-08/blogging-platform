@@ -10,6 +10,7 @@ const Blog = lazy(() => import("./pages/Blog"));
 const NewStory = lazy(() => import("./pages/NewStory"));
 import ProtectedRoutes from './ProtectedRoutes';
 import AdminRoutes from './AdminRoutes';
+import AdminBlogs from './pages/admin/AdminBlogs';
 const Profile = lazy(() => import("./pages/Profile"));
 const MyStories = lazy(() => import("./pages/MyStories"));
 const Saved = lazy(() => import("./pages/Saved"));
@@ -85,6 +86,11 @@ const App = () => {
                         </AdminRoutes>
                     } />
 
+                    <Route path='/admin/blogs' element={
+                        <AdminRoutes>
+                            <AdminBlogs />
+                        </AdminRoutes>
+                    } />
                 </Routes>
             </Suspense>
         </QueryClientProvider>

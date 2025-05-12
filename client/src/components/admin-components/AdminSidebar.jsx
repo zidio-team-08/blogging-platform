@@ -21,9 +21,9 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
         return (
             <Link
                 to={item.path}
-                className={`flex items-center border border-base-300 gap-3 bg-base-200 px-4 py-3 rounded-md transition-colors ${isActive
+                className={`flex items-center border border-base-300 gap-3  px-4 py-3 rounded-md transition-colors ${isActive
                     ? 'bg-primary text-white'
-                    : 'text-base-content hover:bg-base-200'
+                    : 'text-base-content hover:bg-base-300'
                     }`}>
                 {item.icon}
                 <span className="font-medium">{item.name}</span>

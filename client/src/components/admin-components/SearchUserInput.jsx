@@ -35,7 +35,7 @@ const SearchUserInput = () => {
                 <input
                     type="text"
                     placeholder="Search users by username or email"
-                    className="w-full py-3 px-5 text-sm focus:border-primary outline-none bg-base-200 border border-base-300 rounded-md"
+                    className="w-full py-3 text-base-content font-semibold px-5 text-sm focus:border-primary outline-none bg-base-100 border border-base-300 rounded-md"
                     value={inputValue}
                     onChange={handleInputChange}
                 />

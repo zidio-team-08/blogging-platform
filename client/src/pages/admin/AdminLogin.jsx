@@ -52,11 +52,11 @@ const AdminLogin = () => {
     };
 
     return (
-        <div className="w-full min-h-screen flex items-center justify-center bg-gray-100">
-            <div className="w-[95%] sm:max-w-md bg-white rounded-md border border-base-300 py-5 px-5">
+        <div className="w-full min-h-screen flex items-center justify-center bg-base-200">
+            <div className="w-[95%] sm:max-w-md bg-base-100 rounded-md border border-base-300 py-5 px-5">
                 <div className="text-center mb-8">
-                    <h1 className="text-2xl font-bold text-gray-800">Admin Portal</h1>
-                    <p className="text-gray-600 mt-2">Sign in to access the admin dashboard</p>
+                    <h1 className="text-2xl font-bold text-base-content">Admin Portal</h1>
+                    <p className="text-base-content/80 mt-2">Sign in to access the admin dashboard</p>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -87,10 +87,10 @@ const AdminLogin = () => {
                                 autoComplete="off"
                             />
                             {passwordVisible ?
-                                <span onClick={() => setPasswordVisible(false)} className="cursor-pointer absolute right-3 p-2 rounded-full hover:bg-gray-100">
+                                <span onClick={() => setPasswordVisible(false)} className="cursor-pointer absolute right-3 p-2 rounded-full hover:bg-base-300">
                                     <FaEye size={16} />
                                 </span> :
-                                <span onClick={() => setPasswordVisible(true)} className="cursor-pointer absolute right-3 p-2 rounded-full hover:bg-gray-100">
+                                <span onClick={() => setPasswordVisible(true)} className="cursor-pointer absolute right-3 p-2 rounded-full hover:bg-base-300">
                                     <FaEyeSlash size={16} />
                                 </span>}
                         </div>

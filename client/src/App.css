@@ -7,7 +7,7 @@
 
 body {
     width: 100%;
-    /* background-color: #ffffff; */
+    background-color: var(--color-base-300);
     font-family: var(--main-font);
     /* font-family: "Open Sans", sans-serif; */
     /* F3F4F6 */
@@ -26,6 +26,6 @@ body {
     font-family: var(--font-3);
 }
 
-.main-font{
+.main-font {
     font-family: var(--main-font);
 }

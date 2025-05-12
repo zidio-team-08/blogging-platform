@@ -4,6 +4,7 @@ import { FiUsers, FiFileText, FiUserCheck, FiUserX, FiEdit, FiTrash2 } from 'rea
 import { Link } from 'react-router-dom'
 import AdminHeader from '../../components/admin-components/AdminHeader'
 import { MdBlock } from 'react-icons/md'
+import Confirm from '../../components/modal/Confirm'
 
 const AdminDashboard = () => {
    const [stats, setStats] = useState({
@@ -20,7 +21,8 @@ const AdminDashboard = () => {
       { id: 4, name: 'Emily Davis', email: 'emily@example.com', joinedAt: '2023-05-12', status: 'inactive', avatar: 'https://randomuser.me/api/portraits/women/4.jpg' },
       { id: 5, name: 'Michael Wilson', email: 'michael@example.com', joinedAt: '2023-05-11', status: 'active', avatar: 'https://randomuser.me/api/portraits/men/5.jpg' }
    ])
-   const [loading, setLoading] = useState(false)
+   const [loading, setLoading] = useState(false);
+   const [showModel, setShowModel] = useState(false);
 
    useEffect(() => {
       // Mock data - replace with actual API calls
@@ -44,6 +46,11 @@ const AdminDashboard = () => {
       // }, 1000)
    }, [])
 
+
+   const blockUserhandler = () => {
+      setShowModel(false)
+   }
+
    const StatCard = ({ title, value, icon, color }) => (
       <div className="bg-base-100 rounded-md border border-base-300 px-3 sm:px-4 py-4 sm:py-6 flex items-center">
          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${color}`}>
@@ -56,14 +63,13 @@ const AdminDashboard = () => {
       </div>
    )
    return (
-      <div className="w-full h-full bg-base-100">
+      <div className="w-full h-full">
          <div className="flex flex-col md:flex-row">
             <div className="flex-1 xl:ml-64 p-3 sm:p-4 md:p-6 overflow-auto">
                <div className="mb-4 sm:mb-6">
                   <h1 className="text-xl sm:text-md capitalize font-bold text-base-content">Dashboard</h1>
-                  <p className="text-primary-content/50 text-sm mt-1">Manage all users in the system</p>
+                  <p className="text-base-content/80 text-sm mt-1 font-semibold">Manage all users in the system</p>
                </div>
-
                {loading ? (
                   <div className="flex justify-center items-center h-64">
                      <div className="loading loading-spinner loading-lg"></div>
@@ -108,11 +114,11 @@ const AdminDashboard = () => {
                            <table className="min-w-full divide-y divide-base-300">
                               <thead className="bg-base-200">
                                  <tr>
-                                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-base-content uppercase tracking-wider">User</th>
-                                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-base-content uppercase tracking-wider">Email</th>
-                                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-base-content uppercase tracking-wider">Joined</th>
-                                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-base-content uppercase tracking-wider">Status</th>
-                                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-base-content uppercase tracking-wider">Actions</th>
+                                    <th className="px-3 sm:px-6 py-3 sm:py-3 text-left text-xs font-semibold text-base-content capitalize tracking-wider">User</th>
+                                    <th className="px-3 sm:px-6 py-3 sm:py-3 text-left text-xs font-semibold text-base-content capitalize tracking-wider">Email</th>
+                                    <th className="px-3 sm:px-6 py-3 sm:py-3 text-left text-xs font-semibold text-base-content capitalize tracking-wider">Joined</th>
+                                    <th className="px-3 sm:px-6 py-3 sm:py-3 text-left text-xs font-semibold text-base-content capitalize tracking-wider">Status</th>
+                                    <th className="px-3 sm:px-6 py-3 sm:py-3 text-left text-xs font-semibold text-base-content capitalize tracking-wider">Actions</th>
                                  </tr>
                               </thead>
                               <tbody className="bg-base-100 divide-y divide-base-300">
@@ -145,7 +151,7 @@ const AdminDashboard = () => {
                                                 </button>
                                              </div>
                                              <div className="tooltip" data-tip="Block User">
-                                                <button type='button' data-tooltip-id='block-user-tooltip' className="text-red-600 cursor-pointer hover:bg-base-300 p-2 rounded-sm">
+                                                <button onClick={() => setShowModel(true)} type='button' data-tooltip-id='block-user-tooltip' className="text-red-600 cursor-pointer hover:bg-base-300 p-2 rounded-sm">
                                                    <MdBlock size={16} />
                                                 </button>
                                              </div>
@@ -166,6 +172,13 @@ const AdminDashboard = () => {
                )}
             </div>
          </div>
+         <Confirm
+            showModel={showModel}
+            setShowModel={setShowModel}
+            title="Confirmation Required"
+            message="Are you sure you want to block this user?"
+            className='text-white hover:bg-red-600 bg-red-500'
+            onConfirm={blockUserhandler} />
       </div>
    )
 }
