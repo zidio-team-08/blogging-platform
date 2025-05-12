@@ -300,6 +300,7 @@ export const blogLikeUnlike = async (req, res, next) => {
             message: msg,
             data: {
                 blogId: blog._id,
+                likes: blog.likes,
                 likes: blog.likes.length,
             },
         });
