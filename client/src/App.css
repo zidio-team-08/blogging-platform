@@ -29,3 +29,8 @@ body {
 .main-font {
     font-family: var(--main-font);
 }
+
+input,
+.input {
+    box-shadow: none;
+}

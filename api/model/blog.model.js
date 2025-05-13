@@ -19,6 +19,10 @@ const blogSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
+    isPublished: {
+        type: Boolean,
+        default: true,
+    },
     tags: [{
         type: String,
         trim: true,

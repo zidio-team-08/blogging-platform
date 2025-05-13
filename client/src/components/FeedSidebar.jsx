@@ -60,7 +60,7 @@ const FeedSidebar = () => {
                     ))}
                 </div>
             </div>
-            <ul className="list mt-4 border-t border-base-200 pt-2">
+            <ul className="list mt-4 border-t border-base-200 pt-2 sticky top-0">
                 <li className="p-4 pb-2 text-md font-medium opacity-60 tracking-wide">Popular Blog Posts</li>
                 {popularPosts.map((post, index) => (
                     <li key={index} className="list-row p-3 rounded-md transition-colors">

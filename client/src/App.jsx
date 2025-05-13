@@ -11,14 +11,17 @@ const NewStory = lazy(() => import("./pages/NewStory"));
 import ProtectedRoutes from './ProtectedRoutes';
 import AdminRoutes from './AdminRoutes';
 import AdminBlogs from './pages/admin/AdminBlogs';
+// import UserProfile from './pages/UserProfile';
 const Profile = lazy(() => import("./pages/Profile"));
 const MyStories = lazy(() => import("./pages/MyStories"));
 const Saved = lazy(() => import("./pages/Saved"));
+const UserProfile = lazy(() => import("./pages/UserProfile"));
 
 // admin panel routes
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+
 
 const App = () => {
 
@@ -39,9 +42,8 @@ const App = () => {
             }>
                 <Routes>
                     <Route path='/' element={
-                        <ProtectedRoutes>
-                            <Home />
-                        </ProtectedRoutes>} />
+                        <Home />
+                    } />
                     <Route path='/register' element={<Register />} />
                     <Route path='/login' element={<Login />} />
 
@@ -67,6 +69,10 @@ const App = () => {
                         <ProtectedRoutes>
                             <Saved />
                         </ProtectedRoutes>
+                    } />
+
+                    <Route path='/user/:username' element={
+                        <UserProfile />
                     } />
 
                     {/* admin panel routes */}

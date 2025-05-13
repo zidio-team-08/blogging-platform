@@ -5,6 +5,7 @@ import HeaderMenu from './HeaderMenu';
 import Logout from './modal/Logout';
 import ThemeToggle from './ThemeToggle';
 import { useSelector } from 'react-redux';
+import { IoMdClose } from "react-icons/io";
 
 const Header = () => {
 
@@ -18,20 +19,28 @@ const Header = () => {
     return (
         <>
             <div className="w-full h-14 bg-base-100 border border-base-300 flex items-center justify-between px-6 relative max-[810px]:px-4">
-                <Link to='/'>
-                    <h1 className='text-xl font-semibold capitalize'>Postilo</h1>
-                </Link>
-                {
-                    location.pathname == '/' && (
-                        <div className='w-full input max-w-96 focus-within:shadow-none focus-within:outline-none focus-within:border-primary mx-auto absolute left-1/2 -translate-x-1/2 max-[810px]:hidden rounded-md'>
+                <div className='flex items-center gap-10'>
+                    <Link to='/'>
+                        <h1 className='text-xl font-bold capitalize'>Blogs</h1>
+                    </Link>
+                    {location.pathname == '/' && (
+                        <div className='w-full input md:w-96 focus-within:shadow-none focus-within:outline-none focus-within:border-primary mx-auto max-[810px]:hidden rounded-sm bg-base-200 border-transparent ml-8'>
                             <input
                                 type="text"
                                 placeholder="Search"
                                 className=" font-medium pl-3" />
-                            <span><FiSearch className='cursor-pointer' size={18} /></span>
+
+                            {/* <span className='cursor-pointer -mr-2 p-1.5 hover:bg-base-300 rounded-full'>
+                                <IoMdClose className='cursor-pointer' size={18} />
+                            </span> */}
+
+                            <span className='cursor-pointer -mr-2 p-1.5 hover:bg-base-300 rounded-full'>
+                                <FiSearch className='cursor-pointer' size={18} />
+                            </span>
                         </div>
-                    )
-                }
+
+                    )}
+                </div>
 
                 <div className='flex items-center gap-4'>
                     <div className='max-[810px]:block hidden cursor-pointer hover:text-primary rounded-full'><FiSearch size={22} /></div>
