@@ -56,7 +56,7 @@ export const fetchBlogComments = async (req, res, next) => {
 
         if (page < 1) return next(new errorHandler('Page number cannot be less than 1', 400));
 
-        if (limit < 10) return next(new errorHandler('Limit cannot be less than 10', 400));
+        if (limit < 5) return next(new errorHandler('Limit cannot be less than 5', 400));
 
         if (limit > 10) return next(new errorHandler('Limit cannot be greater than 10', 400));
 
@@ -73,19 +73,25 @@ export const fetchBlogComments = async (req, res, next) => {
 
         if (!comments) return next(new errorHandler('No comments found', 404));
 
-        // add isLiked property
-        comments.forEach(comment => {
-            comment.isLiked = comment.likes.includes(req.user.id);
-        });
+        const formattedComments = comments.map(comment => {
+            const { userId, likes, ...rest } = comment;
 
-        // add likes property
-        comments.map(comment => {
-            comment.likes = comment.likes.length;
+            return {
+                ...rest,
+                likes: likes.length,
+                isLiked: likes.some(like => like.toString() === req.user.id),
+                author: {
+                    id: userId._id,
+                    name: userId.name,
+                    username: userId.username,
+                    profileImage: userId.profileImage.url,
+                }
+            };
         });
 
         res.status(200).json({
             success: true,
-            data: comments
+            data: formattedComments
         });
 
     } catch (error) {
@@ -123,6 +129,9 @@ export const likeUnlikeComment = async (req, res, next) => {
             data: {
                 commentId: comment._id,
                 likes: comment.likes.length,
+                isLiked: comment.likes.map(like => like.toString()).includes(req.user.id),
+                name: req.user.name,
+                username: req.user.username,
             },
         });
 

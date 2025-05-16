@@ -19,6 +19,12 @@ import isAuth from './middleware/authMiddleware.js';
 import { errorMiddleware } from './middleware/errorMiddleware.js';
 import { limiter } from "./config/rate.limiter.js";
 
+// import { createBlog, createUser } from './seeders/all.js';
+
+
+// createUser(1)
+// createBlog(30);
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -56,6 +62,8 @@ app.get('/', (req, res) => {
 
 // Error handling middleware
 app.use(errorMiddleware);
+
+
 
 app.listen(PORT, () => {
     console.log(`Server is running at port ${PORT}`);

@@ -11,7 +11,7 @@ const NewStory = lazy(() => import("./pages/NewStory"));
 import ProtectedRoutes from './ProtectedRoutes';
 import AdminRoutes from './AdminRoutes';
 import AdminBlogs from './pages/admin/AdminBlogs';
-// import UserProfile from './pages/UserProfile';
+import Search from './pages/Search';
 const Profile = lazy(() => import("./pages/Profile"));
 const MyStories = lazy(() => import("./pages/MyStories"));
 const Saved = lazy(() => import("./pages/Saved"));
@@ -26,7 +26,14 @@ const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const App = () => {
 
     // React Query
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+        defaultOptions: {
+            queries: {
+                staleTime: 1000 * 60 * 5, // 5 minutes
+                cacheTime: 1000 * 60 * 10, // 10 minutes
+            },
+        },
+    });
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
     useEffect(() => {
@@ -42,12 +49,17 @@ const App = () => {
             }>
                 <Routes>
                     <Route path='/' element={
-                        <Home />
+                        <ProtectedRoutes>
+                            <Home />
+                        </ProtectedRoutes>
                     } />
                     <Route path='/register' element={<Register />} />
                     <Route path='/login' element={<Login />} />
-
-                    <Route path='/blog/:id' element={<Blog />} />
+                    <Route path='blog/:id' element={
+                        <ProtectedRoutes>
+                            <Blog />
+                        </ProtectedRoutes>
+                    } />
                     <Route path='/new-story' element={
                         <ProtectedRoutes>
                             <NewStory />
@@ -72,8 +84,16 @@ const App = () => {
                     } />
 
                     <Route path='/user/:username' element={
-                        <UserProfile />
+                        <ProtectedRoutes>
+                            <UserProfile />
+                        </ProtectedRoutes>
                     } />
+                    <Route path='/search' element={
+                        <ProtectedRoutes>
+                            <Search />
+                        </ProtectedRoutes>
+                    } />
+
 
                     {/* admin panel routes */}
                     <Route path='/admin/login' element={

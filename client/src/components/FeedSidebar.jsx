@@ -1,6 +1,9 @@
-import React from 'react'
+import React from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 const FeedSidebar = () => {
+
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const recommendedTopics = [
         "Programming",
@@ -44,6 +47,10 @@ const FeedSidebar = () => {
         },
     ];
 
+    const handleTopicClick = (topic) => {
+        setSearchParams({ tags: topic });
+    };
+
 
     return (
         <div className='w-full max-w-[368px] border-l border-base-300 px-2 py-5 max-[1000px]:hidden'>
@@ -53,8 +60,8 @@ const FeedSidebar = () => {
                     {recommendedTopics.map(topic => (
                         <span
                             key={topic}
-                            className="px-3 py-1.5 rounded-full text-sm font-medium bg-base-300 hover:bg-primary hover:text-white transition-colors duration-200 cursor-pointer"
-                        >
+                            onClick={() => handleTopicClick(topic)}
+                            className="px-3 py-1.5 rounded-full text-sm font-medium bg-base-300 hover:bg-primary hover:text-white transition-colors duration-200 cursor-pointer">
                             {topic}
                         </span>
                     ))}

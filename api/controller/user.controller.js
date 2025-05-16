@@ -120,7 +120,6 @@ export const updateProfile = async (req, res, next) => {
             role: user.role,
             following: user.following.length,
             followers: user.followers.length,
-            // bookmarks: user.bookmarks,
         };
 
         if (user.profileImage?.url) {
@@ -254,7 +253,9 @@ export const followUnfollow = async (req, res, next) => {
             message: msg,
             data: {
                 following: loggedInUser.following.length,
-                followers: user.followers.length,
+                isFollowing: loggedInUser.following.includes(userId),
+                name: user.name,
+                username: user.username,
             },
         });
 
@@ -271,22 +272,22 @@ export const searchUser = async (req, res, next) => {
 
         if (!query) return next(new errorHandler('Please provide search query', 400));
 
-        const page = req.query.page || 1;
-        const limit = req.query.limit || 10;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
 
         if (page < 1) return next(new errorHandler('Page number cannot be less than 1', 400));
         if (limit < 3) return next(new errorHandler('Limit cannot be less than 3', 400));
         if (limit > 10) return next(new errorHandler('Limit cannot be greater than 10', 400));
 
-
         const users = await User.find({
+            _id: { $ne: req.user.id },
             $or: [
                 { name: { $regex: query, $options: 'i' } },
                 { username: { $regex: query, $options: 'i' } },
                 { email: { $regex: query, $options: 'i' } }
             ]
-        }).skip(skip).limit(limit).sort({ updatedAt: -1 }).lean();
+        }).skip(skip).limit(limit).lean();
 
         if (!users) return next(new errorHandler('No users found', 404));
 
@@ -296,7 +297,8 @@ export const searchUser = async (req, res, next) => {
                 name: user.name,
                 username: user.username,
                 profileImage: user?.profileImage?.url,
-                bio: user.bio
+                bio: user.bio,
+                isFollowing: user.followers.some(f => f.toString() === req.user.id.toString()),
             }
         })
 

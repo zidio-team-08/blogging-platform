@@ -1,5 +1,5 @@
 import express from 'express';
-import { blogLikeUnlike, createNewStory, deleteBlog, editStory, getBlogs, searchBlog, getUserBlogs } from '../controller/blog.controller.js';
+import { blogLikeUnlike, createNewStory, deleteBlog, editStory, getBlogs, searchBlog, getUserBlogs, getBlogDetailsById } from '../controller/blog.controller.js';
 import isAuth from '../middleware/authMiddleware.js';
 import { uploadProfile } from '../middleware/upload.js';
 import { limiter } from '../config/rate.limiter.js';
@@ -9,7 +9,7 @@ const router = express.Router();
 router.post("/create-blog", isAuth, limiter, uploadProfile.single('bannerImage'), createNewStory);
 
 // get all blogs
-router.get("/get-blogs", getBlogs);
+router.get("/get-blogs", isAuth, getBlogs);
 
 // get all blogs created by user
 router.get("/mystories", isAuth, uploadProfile.single('bannerImage'), getUserBlogs);
@@ -24,6 +24,9 @@ router.delete("/delete-blog/:id", isAuth, deleteBlog);
 router.put("/like-unlike", isAuth, blogLikeUnlike);
 
 // seach
-router.get('/search', searchBlog);
+router.get('/search', isAuth, searchBlog);
+
+// get blog details by id
+router.get('/:blogId', isAuth, getBlogDetailsById);
 
 export default router;

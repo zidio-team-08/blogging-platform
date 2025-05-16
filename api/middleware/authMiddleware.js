@@ -26,7 +26,15 @@ const isAuth = asyncHandler(async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         // Find user
-        const user = await User.findById(decoded.id).select('-password');
+        const user = await User.findById(decoded.id).select('-password -following -followers');
+
+        // Check if user is active
+        if (!user.active) {
+            res.status(401);
+            res.clearCookie('token');
+            throw new Error('Your account has been deactivated. Please contact admin.');
+        }
+
         if (!user) {
             res.status(401);
             throw new Error('Unauthorized access. Please login.');
@@ -37,8 +45,6 @@ const isAuth = asyncHandler(async (req, res, next) => {
 
         next();
     } catch (error) {
-        console.log(error);
-        
         res.status(401);
         // Provide more specific error messages based on JWT error type
         if (error.name === 'JsonWebTokenError') {
