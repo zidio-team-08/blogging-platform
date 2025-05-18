@@ -3,6 +3,7 @@ import User from '../model/user.model.js'; // Make sure you import your User mod
 import { blog_image_upload, deleteFilesFromCloudinary } from '../utils/uploadImage.js';
 import { errorHandler } from '../middleware/errorMiddleware.js';
 import commentModel from '../model/comment.model.js';
+import bookmarkModel from '../model/bookmark.model.js';
 
 // senetize search query 
 const sanitizeQuery = (query) => {
@@ -416,6 +417,8 @@ export const getBlogDetailsById = async (req, res, next) => {
       const isLiked = blog.likes.map((id) => id.toString()).includes(req.user.id);
       const commentCount = await commentModel.countDocuments({ blogId: blog._id }).lean();
 
+      const bookmark = await bookmarkModel.findOne({ userId: req.user.id, blogId: blog._id }).lean();
+
       const blogData = {
          id: blog._id,
          title: blog.title,
@@ -433,6 +436,7 @@ export const getBlogDetailsById = async (req, res, next) => {
          likes: blog.likes.length,
          isFollowing,
          isLiked,
+         isBookmarked: bookmark ? true : false,
          createdAt: blog.createdAt,
          updatedAt: blog.updatedAt,
       };
@@ -443,6 +447,56 @@ export const getBlogDetailsById = async (req, res, next) => {
       });
 
    } catch (error) {
+      return next(error);
+   }
+}
+
+
+// Popular Post Filter by likes and comments 
+export const popularPosts = async (req, res, next) => {
+
+   try {
+
+      const page = req.query.page || 1;
+      const limit = req.query.limit || 5;
+      const skip = (page - 1) * limit;
+
+      if (page < 1) return next(new errorHandler('Page number cannot be less than 1', 400));
+
+      if (limit < 1) return next(new errorHandler('Limit cannot be less than 1', 400));
+
+      if (limit > 10) return next(new errorHandler('Limit cannot be greater than 10', 400));
+
+      const blogs = await blogModel.find({ isPublished: true })
+         .populate('author', 'name username profileImage')
+         .lean()
+         .skip(skip)
+         .limit(limit)
+         .sort({ createdAt: -1 });
+
+      if (!blogs) return next(new errorHandler('No blogs found', 404));
+
+      const updated = blogs.map((blog) => {
+         return {
+            id: blog._id,
+            title: blog.title,
+            author: {
+               id: blog.author._id,
+               name: blog.author.name,
+               username: blog.author.username,
+               profileImage: blog.author.profileImage.url,
+            },
+            createdAt: blog.createdAt,
+         }
+      });
+
+      res.status(200).json({
+         success: true,
+         data: updated,
+      });
+
+   } catch (error) {
+      console.log(error);
       return next(error);
    }
 }

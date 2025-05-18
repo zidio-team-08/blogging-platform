@@ -31,7 +31,7 @@ const newStorySlice = createSlice({
             state.content = '';
             state.tags = [];
             state.bannerImage = null;
-        }
+        },
     }
 });
 

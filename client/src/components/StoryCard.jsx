@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 const StoryCard = ({ blog, isFetching }) => {
 
     const navigate = useNavigate();
- 
+
     return (
         <div key={blog.id} className='w-full cursor-pointer max-w-[680px] my-6 px-3 py-2 md:p-4 border border-base-300 rounded-sm mx-auto flex flex-col md:flex-row gap-3 md:gap-5 bg-base-100 transition-all duration-200'
             onClick={() => navigate(`/blog/${blog?.id}`, { replace: true })}>
@@ -37,9 +37,9 @@ const StoryCard = ({ blog, isFetching }) => {
                 <p className='text-base-content/70 mb-3 md:mb-4 line-clamp-2 text-sm md:text-base'>{blog?.content}</p>
                 <div className='flex items-center gap-5 -mt-2 text-xs md:text-sm'>
                     <p className='text-base-content/80 font-semibold text-xs'>{formatDate(blog?.createdAt)}</p>
-                    {isFetching ? <div class="flex gap-3 md:gap-4 animate-pulse">
-                        <div class="flex items-center gap-1 bg-gray-200 rounded w-10 h-5"></div>
-                        <div class="flex items-center gap-1 bg-gray-200 rounded w-10 h-5"></div>
+                    {isFetching ? <div className="flex gap-3 md:gap-4 animate-pulse">
+                        <div className="flex items-center gap-1 bg-base-300 rounded w-10 h-5"></div>
+                        <div className="flex items-center gap-1 bg-base-300 rounded w-10 h-5"></div>
                     </div> : <div className='flex gap-3 md:gap-4'>
                         <span className='flex items-center gap-1 text-rose-500'>
                             <FaHeart />

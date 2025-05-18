@@ -49,10 +49,10 @@ const useApi = () => {
             });
 
             const { success, message } = handleResponse(response);
-            if (success && message == "Comment created successfully") {
-                toast.success('Comment added successfully');
-            } else {
+
+            if (!success) {
                 toast.error(message);
+                return;
             }
         } catch (error) {
             const { message } = handleResponse(error);
@@ -102,8 +102,45 @@ const useApi = () => {
         }
     }
 
+    // save story
+    const saveStory = async (data) => {
+        try {
+            const response = await fetchData({
+                url: '/api/bookmark/add-remove',
+                method: 'PUT',
+                data: { blogId: data }
+            });
 
-    return { followUnfollow, postComment, likeUnlikeComment, likeUnlikeBlog };
+            const { success, message } = handleResponse(response);
+
+            if (!success) {
+                toast.error(message);
+                return;
+            }
+
+            let isBookmarked;
+
+            if (message == 'Bookmark added successfully') {
+                toast.success('Story saved successfully', {
+                    id: toastId,
+                });
+                isBookmarked = true;
+            } else if (message == 'Bookmark removed successfully') {
+                toast.success('Story removed from saved stories', {
+                    id: toastId,
+                });
+                isBookmarked = false;
+            } else {
+                toast.error(message);
+            }
+            return isBookmarked;
+        } catch (error) {
+            const { message } = handleResponse(error);
+            toast.error(message);
+        }
+    }
+
+    return { followUnfollow, postComment, likeUnlikeComment, likeUnlikeBlog, saveStory };
 }
 
 export default useApi;

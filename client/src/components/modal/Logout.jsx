@@ -1,9 +1,46 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import useAxios from '../../hook/useAxios';
+import { handleResponse } from '../../utils/responseHandler';
+import { useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import Button from '../Button';
+import { logout } from '../../features/authSlice';
+import { useDispatch } from 'react-redux';
 
 const Logout = ({ modalRef }) => {
 
-   const handleLogout = () => {
-      modalRef.current.close();
+   const { fetchData } = useAxios();
+   const navigate = useNavigate();
+   const queryClient = useQueryClient();
+   const [loading, setLoading] = React.useState(false);
+   const dispatch = useDispatch();
+
+   const handleLogout = async () => {
+      setLoading(true);
+      try {
+         const result = await fetchData({
+            url: '/api/auth/logout',
+            method: 'GET',
+         });
+
+         const { success, message } = handleResponse(result);
+
+         if (success && message == "Logout successful") {
+            toast.success('Logout successful');
+            dispatch(logout());
+            queryClient.removeQueries();
+            navigate('/login', { replace: true });
+         } else {
+            toast.error(message);
+         }
+      } catch (error) {
+         const { message } = handleResponse(error);
+         toast.error(message || "Something went wrong");
+      } finally {
+         setLoading(false);
+         modalRef.current.close();
+      }
    };
 
    return (
@@ -15,7 +52,7 @@ const Logout = ({ modalRef }) => {
                <div className="modal-action flex justify-end gap-3">
                   <form method="dialog" className="flex gap-3">
                      <button className="btn">Cancel</button>
-                     <button type='button' onClick={handleLogout} className="btn bg-red-500 hover:bg-red-600 text-white border-none">Logout</button>
+                     <Button type='button' loading={loading} title='Logout' className={'!w-[100px] !m-0 !bg-red-500 !hover:bg-red-600 !text-white !border-none'} onClick={handleLogout} />
                   </form>
                </div>
             </div>

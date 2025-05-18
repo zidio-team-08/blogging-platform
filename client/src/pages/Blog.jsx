@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { FiClock, FiMessageSquare, FiShare2, FiBookmark } from 'react-icons/fi';
-import { FaRegHeart, FaHeart } from 'react-icons/fa';
+import { FaRegHeart, FaHeart, FaArrowCircleDown } from 'react-icons/fa';
 import '../assets/css/like-button.css';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import useAxios from '../hook/useAxios';
 import { formatDate } from '../utils/utils';
 import StoryComment from '../components/StoryComment';
@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import useApi from '../hook/api';
 import { setBlogLike, setFollowingStatus } from '../features/userActionsSlice';
 import toast from 'react-hot-toast';
+import RelatedBlogsLoader from '../components/Loaders/relatedBlogsLoader';
 
 const LikeButton = ({ likes, isLiked, onLike }) => {
     return (
@@ -51,7 +52,7 @@ const Blog = () => {
     const [isBookmarked, setIsBookmarked] = useState(false);
     const blogId = idSanitizer(id);
     const { fetchData } = useAxios();
-    const { followUnfollow, likeUnlikeBlog } = useApi();
+    const { followUnfollow, likeUnlikeBlog, saveStory } = useApi();
     const dispatch = useDispatch();
     const { followingStatus, blogLikesStatus, commentLikesStatus } = useSelector((state) => state.userActions);
 
@@ -67,9 +68,36 @@ const Blog = () => {
         cacheTime: 0,
     });
 
-    const handleBookmark = () => {
-        setIsBookmarked(!isBookmarked);
-    };
+    const {
+        data: relatedBlogs,
+        isLoading: relatedBlogsLoading,
+        fetchNextPage,
+        isFetching,
+        isFetchingNextPage,
+        hasNextPage,
+        isError: relatedBlogsIsError,
+        error: relatedBlogsError,
+    } = useInfiniteQuery({
+        queryKey: ["RELATED_BLOGS", blogId],
+        queryFn: async ({ pageParam = 1 }) => await fetchData({
+            url: `/api/blog/search?query=${blog?.data?.tags[0]}&page=${pageParam}&limit=4`,
+            method: 'GET',
+        }),
+        getNextPageParam: (lastPage, allPages) => {
+            return lastPage?.data?.length === 4 ? allPages.length + 1 : undefined;
+        },
+        initialPageParam: 1,
+        refetchOnWindowFocus: false,
+        enabled: !!blog,
+        staleTime: 0,
+        cacheTime: 0,
+    });
+
+
+    useEffect(() => {
+        setIsBookmarked(blog?.data?.isBookmarked);
+    }, [blog, relatedBlogsLoading])
+
 
     // Derive isLiked from local state or backend
     const isLiked = blogLikesStatus?.[blogId] !== undefined
@@ -107,6 +135,36 @@ const Blog = () => {
             toast.error(error?.message || "Failed to update like status");
         }
     };
+
+
+    // save story handler
+    const saveStoryHandler = async () => {
+        setIsBookmarked(!isBookmarked);
+        setTimeout(async () => {
+            const updatedStatus = await saveStory(blogId);
+            setIsBookmarked(updatedStatus);
+        }, 500)
+    };
+
+
+    // share post handler
+    const sharePostHandler = () => {
+        if (navigator.share) {
+            navigator.share({
+                title: blog?.data?.title,
+                text: blog?.data?.content.slice(0, 100) + '...',
+                url: window.location.href,
+            })
+                .then(() => console.log('Shared successfully'))
+                .catch((error) => console.error('Error sharing:', error));
+        } else {
+            toast.error('Sharing is not supported in this browser');
+        }
+    };
+
+    // const relatedBlogsData = relatedBlogs?.pages?.flatMap((page) => page?.data || []);
+    // console.log(relatedBlogsData);
+
 
     if (isPending) {
         return (
@@ -169,14 +227,23 @@ const Blog = () => {
                         </button>
                     </div>
                     <div className="flex gap-4">
+
                         <button
-                            onClick={handleBookmark}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors ${isBookmarked ? 'text-primary bg-primary/10' : 'hover:bg-gray-100'
+                            onClick={saveStoryHandler}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors ${isBookmarked ? 'text-primary bg-primary/10' : 'hover:bg-base-300'
                                 }`}>
                             <FiBookmark size={20} className={isBookmarked ? 'fill-primary' : ''} />
                             <span>Save</span>
                         </button>
-                        <button className="flex cursor-pointer items-center gap-2 px-3 py-1.5 rounded-full hover:bg-gray-100 transition-colors">
+
+                        {/* <button
+                            onClick={saveStoryHandler}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors ${isBookmarked ? 'text-primary bg-primary/10' : 'hover:bg-base-300'
+                                }`}>
+                            <FiBookmark size={20} className={isBookmarked ? 'fill-primary' : ''} />
+                            <span>Save</span>
+                        </button> */}
+                        <button type='button' onClick={sharePostHandler} className="flex cursor-pointer items-center gap-2 px-3 py-1.5 rounded-full hover:bg-base-300 transition-colors">
                             <FiShare2 size={20} /> <span>Share</span>
                         </button>
                     </div>
@@ -197,7 +264,7 @@ const Blog = () => {
                 </div>
 
                 {/* Author bio */}
-                <div className="bg-gray-50 px-6 py-3 border border-base-300 rounded-xl mb-10">
+                <div className="bg-base-200 px-6 py-3 border border-base-300 rounded-xl mb-10">
                     <h3 className="text-lg font-medium mb-1">About the author</h3>
                     <div className='w-full flex justify-between'>
                         <div className="flex items-start gap-5">
@@ -208,7 +275,7 @@ const Blog = () => {
                             />
                             <div>
                                 <p className="font-medium">{blog?.data?.author?.name || blog?.data?.author?.username}</p>
-                                <p className="text-gray-600">{blog?.data?.author?.authorBio}</p>
+                                <p className="text-base-content">{blog?.data?.author?.authorBio}</p>
                             </div>
                         </div>
                         <div className="flex gap-4 mt-2">
@@ -238,30 +305,48 @@ const Blog = () => {
                 {/* Related posts - placeholder */}
                 <div className="mt-16">
                     <h3 className="text-xl font-bold mb-6">Related Posts</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="border border-base-300 rounded-md overflow-hidden hover:shadow-md transition-shadow">
-                            <img
-                                src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070"
-                                alt="Related post"
-                                className="w-full h-48 object-cover"
-                            />
-                            <div className="p-4">
-                                <h4 className="font-bold text-lg mb-2">Understanding React Context API</h4>
-                                <p className="text-gray-600 line-clamp-2">Learn how to use React Context API to avoid prop drilling and manage global state effectively.</p>
+                    {
+                        relatedBlogsLoading ? (
+                            <RelatedBlogsLoader />
+                        ) : relatedBlogsIsError ? (
+                            <div className='w-full h-96 flex items-center justify-center font-semibold'>
+                                {relatedBlogsError?.message || "Something went wrong"}
                             </div>
-                        </div>
-                        <div className="border border-base-300 rounded-md overflow-hidden hover:shadow-md transition-shadow">
-                            <img
-                                src="https://images.unsplash.com/photo-1627398242454-45a1465c2479?q=80&w=2074"
-                                alt="Related post"
-                                className="w-full h-48 object-cover"
-                            />
-                            <div className="p-4">
-                                <h4 className="font-bold text-lg mb-2">Custom Hooks in React</h4>
-                                <p className="text-gray-600 line-clamp-2">Learn how to create and use custom hooks to share logic between components.</p>
-                            </div>
-                        </div>
-                    </div>
+                        ) : (
+                            <>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {relatedBlogs?.pages?.flatMap((page) => page?.data?.map((blog, index) => (
+                                        <div key={`${blog.id}-${index}`} className="border border-base-300 rounded-md overflow-hidden hover:shadow-md transition-shadow">
+                                            <img
+                                                src={blog?.bannerImage}
+                                                alt="Related post"
+                                                className="w-full h-48 object-cover"
+                                            />
+                                            <div className="p-4">
+                                                <h4 className="font-bold text-lg mb-2">{blog?.title?.slice(0, 100) + '...'}</h4>
+                                                <p className="text-gray-600 line-clamp-2">{blog?.content}</p>
+                                            </div>
+                                        </div>
+                                    )))}
+                                </div>
+                                {hasNextPage && (
+                                    <div className="w-full flex justify-center items-center my-8">
+                                        <button
+                                            onClick={() => fetchNextPage()}
+                                            disabled={!hasNextPage || isFetchingNextPage}
+                                            className="shadow-none btn-soft btn-secondary px-4 cursor-pointer text-sm font-medium btn rounded-full">
+                                            {isFetchingNextPage
+                                                ? 'Loading more...'
+                                                : hasNextPage
+                                                    ? 'Show More Blogs'
+                                                    : 'No more blogs'}
+                                            <span className='ml-1'><FaArrowCircleDown size={15} /></span>
+                                        </button>
+                                    </div>
+                                )}
+                            </>
+                        )
+                    }
                 </div>
             </div>
         </>

@@ -1,9 +1,14 @@
 import React from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import useAxios from '../hook/useAxios';
+import PopularPostLoader from './Loaders/PopularPostLoader';
+import { formatDate } from '../utils/utils';
 
 const FeedSidebar = () => {
 
     const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     const recommendedTopics = [
         "Programming",
@@ -19,33 +24,32 @@ const FeedSidebar = () => {
         "Software Engineering",
     ];
 
-    const popularPosts = [
-        {
-            title: "React Hooks Guide",
-            author: "Jane Smith",
-            text: "Learn how to use React hooks effectively in your projects"
+    const { fetchData } = useAxios();
+
+    const {
+        data: popularPosts,
+        isLoading,
+        isError,
+        error,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useInfiniteQuery({
+        queryKey: ["POPULAR_POSTS"],
+        queryFn: async ({ pageParam = 1 }) => await fetchData({
+            url: `/api/blog/popular?page=${pageParam}&limit=6`,
+            method: 'GET',
+        }),
+        getNextPageParam: (lastPage, allPages) => {
+            return lastPage?.data?.length === 5 ? allPages.length + 1 : undefined;
         },
-        {
-            title: "Tailwind CSS Tips",
-            author: "John Doe",
-            text: "Discover advanced techniques for Tailwind CSS styling"
-        },
-        {
-            title: "MERN Stack Tutorial",
-            author: "Alex Johnson",
-            text: "Step-by-step guide to building full-stack applications"
-        },
-        {
-            title: "GraphQL vs REST API",
-            author: "Sarah Williams",
-            text: "Comparing modern API approaches for web development"
-        },
-        {
-            title: "Next.js 14 Features",
-            author: "Michael Chen",
-            text: "Exploring the latest updates in Next.js framework"
-        },
-    ];
+        initialPageParam: 1,
+        refetchOnWindowFocus: false,
+        enabled: true,
+        staleTime: 0,
+        cacheTime: 0,
+    });
+
 
     const handleTopicClick = (topic) => {
         setSearchParams({ tags: topic });
@@ -69,7 +73,35 @@ const FeedSidebar = () => {
             </div>
             <ul className="list mt-4 border-t border-base-200 pt-2 sticky top-0">
                 <li className="p-4 pb-2 text-md font-medium opacity-60 tracking-wide">Popular Blog Posts</li>
-                {popularPosts.map((post, index) => (
+                {
+                    isLoading ? (
+                        <PopularPostLoader />
+                    ) : isError ? (
+                        <div className='w-full h-96 flex items-center justify-center font-semibold'>
+                            {error?.message || "Something went wrong"}
+                        </div>
+                    ) : (
+                        <>
+                            {popularPosts?.pages?.flatMap((page) => page?.data || []).map((post, index) => {
+                                return (
+                                    <li key={`${post.id}-${index}}`} className="list-row cursor-pointer hover:bg-base-200 p-3 rounded-md transition-colors" onClick={() => navigate(`/blog/${post.id}`)}>
+                                        <div className="text-3xl font-bold text-primary/30 tabular-nums">0{index + 1}</div>
+                                        <div className="list-col-grow ml-3">
+                                            <h2 className="text-base font-semibold">{post.title.slice(0, 50) + '...'}</h2>
+                                            <p className="text-xs mt-1 text-gray-600">{post.text}</p>
+                                            <div className="flex items-center gap-2 mt-2">
+                                                <span className="text-xs font-medium text-primary">{post.author.name}</span>
+                                                <span className="text-xs text-gray-500">• {formatDate(post.createdAt)}</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                )
+                            })}
+                        </>
+                    )
+                }
+
+                {/* {popularPosts?.pages?.flatMap(page => page?.data || []).map((post, index) => (
                     <li key={index} className="list-row p-3 rounded-md transition-colors">
                         <div className="text-3xl font-bold text-primary/30 tabular-nums">0{index + 1}</div>
                         <div className="list-col-grow ml-3">
@@ -81,7 +113,7 @@ const FeedSidebar = () => {
                             </div>
                         </div>
                     </li>
-                ))}
+                ))} */}
             </ul>
         </div>
     )

@@ -1,5 +1,5 @@
 import express from 'express';
-import { blogLikeUnlike, createNewStory, deleteBlog, editStory, getBlogs, searchBlog, getUserBlogs, getBlogDetailsById } from '../controller/blog.controller.js';
+import { blogLikeUnlike, createNewStory, deleteBlog, editStory, getBlogs, searchBlog, getUserBlogs, getBlogDetailsById, popularPosts } from '../controller/blog.controller.js';
 import isAuth from '../middleware/authMiddleware.js';
 import { uploadProfile } from '../middleware/upload.js';
 import { limiter } from '../config/rate.limiter.js';
@@ -26,7 +26,10 @@ router.put("/like-unlike", isAuth, blogLikeUnlike);
 // seach
 router.get('/search', isAuth, searchBlog);
 
-// get blog details by id
+// get popular posts
+router.get('/popular', isAuth, popularPosts);
+
+// get blog details by id 
 router.get('/:blogId', isAuth, getBlogDetailsById);
 
 export default router;

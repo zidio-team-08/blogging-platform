@@ -27,7 +27,6 @@ const StoryComment = ({ blogId }) => {
    const { fetchData } = useAxios();
    const { user } = useSelector((state) => state.auth);
    const queryClient = useQueryClient();
-   const [loading, setLoading] = useState(false);
    const { postComment, likeUnlikeComment } = useApi();
    const dispatch = useDispatch();
    const { commentLikesStatus } = useSelector((state) => state.userActions);
@@ -48,6 +47,9 @@ const StoryComment = ({ blogId }) => {
       },
       initialPageParam: 1,
       refetchOnWindowFocus: false,
+      enabled: !!blogId,
+      staleTime: 0,
+      cacheTime: 0,
    });
 
    const { register, handleSubmit, reset, formState: { errors } } = useForm({
@@ -58,15 +60,40 @@ const StoryComment = ({ blogId }) => {
    // handle Comment Submit
    const onSubmit = async (data) => {
       data.blogId = blogId;
-      setLoading(true);
       try {
+         const newComment = {
+            id: Math.random().toString(36).substr(2, 9),
+            content: data.content,
+            author: {
+               id: user._id,
+               name: user.name,
+               username: user.username,
+               profileImage: user.profileImage,
+            },
+            likes: 0,
+            isLiked: false,
+            createdAt: new Date(),
+         };
+
+         // Optimistically update the commentsData cache
+         queryClient.setQueryData(['COMMENTS', blogId], oldData => {
+            if (!oldData) return oldData;
+            return {
+               ...oldData,
+               pages: [
+                  [
+                     { data: [newComment, ...(oldData.pages?.[0]?.data || [])] },
+                     ...oldData.pages.slice(1)
+                  ]
+               ].flat()
+            };
+         });
+
          await postComment(data);
-         queryClient.invalidateQueries(['COMMENTS', blogId]);
          reset();
+         queryClient.invalidateQueries(['COMMENTS', blogId]);
       } catch (err) {
          toast.error(err.message || "Something went wrong");
-      } finally {
-         setLoading(false);
       }
    }
 
@@ -86,29 +113,28 @@ const StoryComment = ({ blogId }) => {
       }
    }
 
-
    return (
       <div className="space-y-6">
          {isPending ? <div className="flex gap-4 animate-pulse">
-            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 max-sm:hidden bg-gray-200">
+            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 max-sm:hidden bg-base-300">
             </div>
             <div className="flex-1">
-               <div className="bg-gray-50 p-4 rounded-md border border-base-300">
+               <div className="bg-base-100 p-4 rounded-md border border-base-300">
                   <div className="flex items-center justify-between mb-2">
-                     <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                     <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                     <div className="h-4 bg-base-300 rounded w-1/4"></div>
+                     <div className="h-4 bg-base-300 rounded w-1/4"></div>
                   </div>
-                  <div className="h-4 bg-gray-200 rounded w-full mt-1"></div>
-                  <div className="h-4 bg-gray-200 rounded w-2/3 mt-1"></div>
+                  <div className="h-4 bg-base-300 rounded w-full mt-1"></div>
+                  <div className="h-4 bg-base-300 rounded w-2/3 mt-1"></div>
                </div>
-               <div className="flex gap-4 mt-2 ml-2 h-4 bg-gray-200 rounded w-1/4">
+               <div className="flex gap-4 mt-2 ml-2 h-4 bg-base-300 rounded w-1/4">
                </div>
             </div>
          </div> :
             <>
                <form onSubmit={handleSubmit(onSubmit)} className="mb-10">
                   <div className="flex gap-4">
-                     <div className="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden max-sm:hidden">
+                     <div className="w-10 h-10 rounded-full bg-base-300 flex-shrink-0 overflow-hidden max-sm:hidden">
                         {user?.profileImage ? (
                            <img src={user?.profileImage} alt="Profile" className='w-full h-full rounded-full object-cover' />
                         ) : (
@@ -124,7 +150,7 @@ const StoryComment = ({ blogId }) => {
                         ></textarea>
                         {errors.content && <p className="text-error text-[13px] font-semibold -mt-1">{errors.content.message}</p>}
                         <div className="flex justify-end mt-2">
-                           <Button className='min-sm:!w-44' title='Post comment' loading={loading} />
+                           <Button className='min-sm:!w-44' title='Post comment' />
                         </div>
                      </div>
                   </div>
@@ -139,12 +165,12 @@ const StoryComment = ({ blogId }) => {
                         />
                      </div>
                      <div className="flex-1">
-                        <div className="bg-gray-50 p-4 rounded-md border border-base-300">
+                        <div className="bg-base-200 p-4 rounded-md border border-base-300">
                            <div className="flex items-center justify-between mb-2">
                               <p className="font-medium">{comment?.author?.name || comment?.author?.username}</p>
-                              <span className="text-sm text-gray-500">{formatDate(comment.createdAt)}</span>
+                              <span className="text-sm text-gray-400">{formatDate(comment.createdAt)}</span>
                            </div>
-                           <p className="text-gray-700">{comment.content}</p>
+                           <p className="text-base-content">{comment.content}</p>
                         </div>
                         <div className="flex gap-4 mt-2 ml-2">
                            <button
