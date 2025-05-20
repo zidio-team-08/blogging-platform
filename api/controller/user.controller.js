@@ -324,8 +324,6 @@ export const getUserDetailsByUsername = async (req, res, next) => {
 
         if (!user) return next(new errorHandler('User not found', 404));
 
-        const blogs = await blogModel.find({ author: user._id }).lean();
-
         let userData = {
             id: user._id,
             name: user.name,
@@ -348,24 +346,9 @@ export const getUserDetailsByUsername = async (req, res, next) => {
             userData.socialLinks = user.socialLinks;
         }
 
-        const updatedBlogs = blogs.map((blog) => {
-            return {
-                id: blog._id,
-                title: blog.title,
-                bannerImage: blog.bannerImage?.url,
-                comments: blog.comments.length,
-                likes: blog.likes.length,
-                createdAt: blog.createdAt,
-                updatedAt: blog.updatedAt,
-            }
-        })
-
         res.status(200).json({
             success: true,
-            data: {
-                user: userData,
-                blogs: updatedBlogs
-            },
+            data: userData,
         });
 
     } catch (error) {
@@ -373,6 +356,55 @@ export const getUserDetailsByUsername = async (req, res, next) => {
     }
 }
 
+// get user blog by username
+export const getUserBlogByUsername = async (req, res, next) => {
+    try {
 
+        const sanitizedUsername = sanitizeUsername(req.params.username);
+
+        if (!sanitizedUsername) return next(new errorHandler('Please provide username', 400));
+
+        const page = req.query.page || 1;
+        const limit = req.query.limit || 10;
+        const skip = (page - 1) * limit;
+
+        const user = await User.findOne({ username: sanitizedUsername }).lean();
+
+        if (!user) return next(new errorHandler('User not found', 404));
+
+        const blogs = await blogModel.find({ author: user._id })
+            .populate('author', 'name username profileImage')
+            .lean()
+            .skip(skip)
+            .limit(limit)
+            .lean()
+            .sort({ createdAt: -1 });
+
+        if (!blogs) return next(new errorHandler('No blogs found', 404));
+
+        const updated = blogs.map((blog) => {
+            return {
+                id: blog._id,
+                title: blog.title,
+                bannerImage: blog?.bannerImage?.url,
+                author: {
+                    id: blog.author._id,
+                    name: blog.author.name,
+                    username: blog.author.username,
+                    profileImage: blog?.author?.profileImage?.url,
+                },
+                createdAt: blog.createdAt,
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            data: updated,
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+}
 
 

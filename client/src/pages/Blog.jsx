@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { FiClock, FiMessageSquare, FiShare2, FiBookmark } from 'react-icons/fi';
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { FiClock, FiMessageSquare, FiShare2, FiBookmark, FiUser } from 'react-icons/fi';
 import { FaRegHeart, FaHeart, FaArrowCircleDown } from 'react-icons/fa';
 import '../assets/css/like-button.css';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
@@ -55,6 +55,8 @@ const Blog = () => {
     const { followUnfollow, likeUnlikeBlog, saveStory } = useApi();
     const dispatch = useDispatch();
     const { followingStatus, blogLikesStatus, commentLikesStatus } = useSelector((state) => state.userActions);
+    const navigate = useNavigate();
+    const { user } = useSelector((state) => state.auth);
 
     const { data: blog, isPending, isError, error } = useQuery({
         queryKey: ["BLOG", blogId],
@@ -162,9 +164,6 @@ const Blog = () => {
         }
     };
 
-    // const relatedBlogsData = relatedBlogs?.pages?.flatMap((page) => page?.data || []);
-    // console.log(relatedBlogsData);
-
 
     if (isPending) {
         return (
@@ -188,14 +187,20 @@ const Blog = () => {
                 </div>
                 {/* Title */}
                 <h1 className="text-3xl md:text-4xl font-bold my-10">{blog?.data?.title}</h1>
-                {/* Author info with follow button */}
                 <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-4">
-                        <img
-                            src={blog?.data?.author?.profileImage}
-                            alt={blog?.data?.author?.name}
-                            className="w-12 h-12 rounded-full object-cover border-2 border-primary/20"
-                        />
+                    <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigate(`/user/${blog?.data?.author?.username}`)}>
+                        {blog?.data?.author?.profileImage ? (
+                            <img
+                                src={blog?.data?.author?.profileImage}
+                                alt={blog?.data?.author?.name || blog?.data?.author?.username}
+                                className="w-12 h-12 rounded-full object-cover max-sm:hidden"
+                            />
+                        ) : (
+                            <div className="w-12 h-12 rounded-full overflow-hidden bg-base-300 flex items-center justify-center max-sm:hidden">
+                                <FiUser size={23} />
+                            </div>
+                        )
+                        }
                         <div>
                             <p className="font-medium text-lg">{blog?.data.author?.name || blog?.data?.auther?.username}</p>
                             <div className="flex items-center gap-3 text-sm text-gray-500">
@@ -204,15 +209,15 @@ const Blog = () => {
                             </div>
                         </div>
                     </div>
-                    <button
-                        onClick={handleFollow}
-                        className={`px-4 py-1.5 rounded-full cursor-pointer text-sm font-medium transition-colors ${(followingStatus[blog?.data?.author?.id] ?? blog?.data?.isFollowing)
-                            ? 'bg-primary text-white hover:bg-primary/90'
-                            : 'border border-primary text-primary hover:bg-primary/10'
-                            }`}
-                    >
-                        {(followingStatus[blog?.data?.author?.id] ?? blog?.data?.isFollowing) ? 'Unfollow' : 'Follow'}
-                    </button>
+                    {user?.id !== blog?.data?.author?.id && (
+                        <button
+                            onClick={handleFollow}
+                            className={`px-4 py-1.5 rounded-full cursor-pointer text-sm font-medium transition-colors ${(followingStatus[blog?.data?.author?.id] ?? blog?.data?.isFollowing)
+                                ? 'bg-primary text-white hover:bg-primary/90'
+                                : 'border border-primary text-primary hover:bg-primary/10'
+                                }`}>
+                            {(followingStatus[blog?.data?.author?.id] ?? blog?.data?.isFollowing) ? 'Unfollow' : 'Follow'}
+                        </button>)}
                 </div>
 
                 <div className="flex items-center justify-between py-4 mb-8 border-t border-b border-base-300">
@@ -235,14 +240,6 @@ const Blog = () => {
                             <FiBookmark size={20} className={isBookmarked ? 'fill-primary' : ''} />
                             <span>Save</span>
                         </button>
-
-                        {/* <button
-                            onClick={saveStoryHandler}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors ${isBookmarked ? 'text-primary bg-primary/10' : 'hover:bg-base-300'
-                                }`}>
-                            <FiBookmark size={20} className={isBookmarked ? 'fill-primary' : ''} />
-                            <span>Save</span>
-                        </button> */}
                         <button type='button' onClick={sharePostHandler} className="flex cursor-pointer items-center gap-2 px-3 py-1.5 rounded-full hover:bg-base-300 transition-colors">
                             <FiShare2 size={20} /> <span>Share</span>
                         </button>
@@ -268,38 +265,41 @@ const Blog = () => {
                     <h3 className="text-lg font-medium mb-1">About the author</h3>
                     <div className='w-full flex justify-between'>
                         <div className="flex items-start gap-5">
-                            <img
-                                src={blog?.data?.author?.profileImage}
-                                alt={blog?.data?.author?.name || blog?.data?.author?.username}
-                                className="w-12 h-12 rounded-full object-cover max-sm:hidden"
-                            />
+                            {
+                                blog?.data?.author?.profileImage ? (
+                                    <img
+                                        src={blog?.data?.author?.profileImage}
+                                        alt={blog?.data?.author?.name || blog?.data?.author?.username}
+                                        className="w-12 h-12 rounded-full object-cover max-sm:hidden"
+                                    />
+                                ) : (
+                                    <div className="w-12 h-12 rounded-full overflow-hidden bg-base-300 flex items-center justify-center max-sm:hidden">
+                                        <FiUser size={23} />
+                                    </div>
+                                )
+                            }
                             <div>
                                 <p className="font-medium">{blog?.data?.author?.name || blog?.data?.author?.username}</p>
                                 <p className="text-base-content">{blog?.data?.author?.authorBio}</p>
                             </div>
                         </div>
                         <div className="flex gap-4 mt-2">
-                            <button
-                                onClick={handleFollow}
-                                className={`px-4 py-1 rounded-full cursor-pointer text-sm font-medium transition-colors ${(followingStatus[blog?.data?.author?.id] ?? blog?.data?.isFollowing)
-                                    ? 'bg-primary text-white hover:bg-primary/90'
-                                    : 'border border-primary text-primary hover:bg-primary/10'
-                                    }`}
-                            >
-                                {(followingStatus[blog?.data?.author?.id] ?? blog?.data?.isFollowing) ? 'Unfollow' : 'Follow'}
-                            </button>
+                            {user?.id !== blog?.data?.author?.id && (
+                                <button
+                                    onClick={handleFollow}
+                                    className={`px-4 py-1 rounded-full cursor-pointer text-sm font-medium transition-colors ${(followingStatus[blog?.data?.author?.id] ?? blog?.data?.isFollowing)
+                                        ? 'bg-primary text-white hover:bg-primary/90'
+                                        : 'border border-primary text-primary hover:bg-primary/10'
+                                        }`}>
+                                    {(followingStatus[blog?.data?.author?.id] ?? blog?.data?.isFollowing) ? 'Unfollow' : 'Follow'}
+                                </button>)}
                         </div>
                     </div>
-
                 </div>
 
                 {/* Comments section */}
                 <div className="mt-10">
-
-
-                    {/* Comments list */}
-                    <StoryComment blogId={blogId} />
-
+                    <StoryComment userId={user?.id} blogId={blogId} user={user?.id} blogAuthorId={blog?.data?.author?.id} />
                 </div>
 
                 {/* Related posts - placeholder */}
@@ -316,7 +316,11 @@ const Blog = () => {
                             <>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {relatedBlogs?.pages?.flatMap((page) => page?.data?.map((blog, index) => (
-                                        <div key={`${blog.id}-${index}`} className="border border-base-300 rounded-md overflow-hidden hover:shadow-md transition-shadow">
+                                        <div key={`${blog.id}-${index}`} className="border border-base-300 rounded-md overflow-hidden hover:shadow-md transition-shadow cursor-pointer" onClick={
+                                            () => {
+                                                navigate(`/blog/${blog.id}`)
+                                                window.scrollTo(0, 0);
+                                            }}>
                                             <img
                                                 src={blog?.bannerImage}
                                                 alt="Related post"

@@ -30,14 +30,17 @@ const ProtectedRoutes = ({ children }) => {
                 dispatch(setUser({ user: data }));
                 dispatch(setIsAuthenticated(true));
             } else {
-                // Only show toast for errors other than authentication issues
                 if (message !== "Unauthorized access. Please login.") {
                     toast.error(message);
+                    dispatch(setIsAuthenticated(false));
+                    dispatch(setUser(null));
                 }
             }
         } catch (error) {
             const errorMessage = error?.message || 'Failed to authenticate user';
             toast.error(errorMessage);
+            dispatch(setIsAuthenticated(false));
+            dispatch(setUser(null));
         } finally {
             setLoading(false);
         }
@@ -55,12 +58,10 @@ const ProtectedRoutes = ({ children }) => {
         );
     }
 
-    // Once we've checked auth and there's no user, redirect to login
     if (!isAuthenticated && !user) {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    // Show the protected content once loading is done
     return (
         <main className="bg-base-100">
             <Header />

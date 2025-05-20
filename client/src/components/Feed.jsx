@@ -42,8 +42,6 @@ const Feed = () => {
         cacheTime: 0,
     });
 
-    // console.log(isFetching);
-
 
     // intinity scroll 
     useEffect(() => {

@@ -8,14 +8,11 @@ const Home = () => {
 
     const scrollRef = useRef(null);
 
-    // Blog categories
-    // const categories = [
-    //     "All", "Technology", "Programming", "Web Development",
-    //     "Data Science", "AI", "Mobile", "Design", "DevOps",
-    //     "Cloud", "Blockchain", "Security"
-    // ];
-
-    const categories = ['All', 'Technology', 'Travel', 'Food', 'Health', 'Education', 'Web Development'];
+    const categories = [
+        "All", "Technology", "Programming", "Web Development",
+        "Data Science", "AI", "Mobile", "Design", "DevOps",
+        "Cloud", "Blockchain", "Security"
+    ];
 
     const [activeCategory, setActiveCategory] = useState("All");
     const [searchParams, setSearchParams] = useSearchParams();
