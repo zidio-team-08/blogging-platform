@@ -6,67 +6,29 @@ import { useDispatch, useSelector } from 'react-redux';
 import { clearNewSotry, setPageStep } from '../features/blogSlice';
 import useAxios from '../hook/useAxios';
 import { handleResponse } from '../utils/responseHandler';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Button from './Button';
-import { selectStyle } from '../utils/utils';
+import { selectStyle, tagsOptions } from '../utils/utils';
 
-const BlogPreview = () => {
+const BlogEditPreview = ({
+    bannerImage: prevBannerImage, tags, prevTitle, prevContent
+}) => {
 
-    const { title, content, pageStep } = useSelector((state) => state.newStory);
-    const dispatch = useDispatch();
-
-    const [options, setOptions] = useState([
-        { label: 'Technology', value: 'technology' },
-        { label: 'Programming', value: 'programming' },
-        { label: 'Design', value: 'design' },
-        { label: 'Business', value: 'business' },
-        { label: 'Health', value: 'health' },
-        { label: 'Science', value: 'science' },
-        { label: 'Travel', value: 'travel' },
-        { label: 'Food', value: 'food' },
-        { label: 'Personal', value: 'personal' },
-        { label: 'Lifestyle', value: 'lifestyle' },
-        { label: 'Fashion', value: 'fashion' },
-        { label: 'Sports', value: 'sports' },
-        { label: 'Music', value: 'music' },
-        { label: 'Movies', value: 'movies' },
-        { label: 'Books', value: 'books' },
-        { label: 'Art', value: 'art' },
-        { label: 'History', value: 'history' },
-        { label: 'Politics', value: 'politics' },
-        { label: 'Environment', value: 'environment' },
-        { label: 'Education', value: 'education' },
-        { label: 'Gaming', value: 'gaming' },
-        { label: 'Photography', value: 'photography' },
-        { label: 'Pets', value: 'pets' },
-        { label: 'Other', value: 'other' },
-        { label: 'Hobbies', value: 'hobbies' },
-        { label: 'DIY', value: 'diy' },
-        { label: 'Home Decor', value: 'home-decor' },
-        { label: 'Cooking', value: 'cooking' },
-        { label: 'Crafts', value: 'crafts' },
-        { label: 'Gardening', value: 'gardening' },
-        { label: 'Fitness', value: 'fitness' },
-        { label: 'Yoga', value: 'yoga' },
-        { label: 'Meditation', value: 'meditation' },
-        { label: 'Mindfulness', value: 'mindfulness' },
-        { label: 'Travel', value: 'travel' },
-        { label: 'Adventure', value: 'adventure' },
-        { label: 'Hiking', value: 'hiking' },
-        { label: 'Camping', value: 'camping' },
-        { label: 'Wildlife', value: 'wildlife' },
-        { label: 'Nature', value: 'nature' },
-        { label: 'Scuba Diving', value: 'scuba-diving' },
-    ]);
-    const [selectedOptions, setSelectedOptions] = useState([]);
-    const [previewImage, setPreviewImage] = useState(null);
+    const [selectedOptions, setSelectedOptions] = useState(
+        tags.map(tag => ({ label: tag, value: tag })) || []
+    );
+    const { id } = useParams();
+    const [previewImage, setPreviewImage] = useState(prevBannerImage);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
     const dropZoneRef = useRef(null);
     const [bannerImage, setBannerImage] = useState(null);
+    const [options, setOptions] = useState(tagsOptions);
     const [loading, setLoading] = useState(false);
     const { fetchData } = useAxios();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const { title, content } = useSelector((state) => state.newStory);
 
     // Improved image validation and processing
     const validateAndProcessImage = useCallback((file) => {
@@ -148,23 +110,41 @@ const BlogPreview = () => {
         fileInputRef.current?.click();
     }, []);
 
-    // handle on public story 
+
     const onPublish = async () => {
         setLoading(true);
         try {
-            if (!bannerImage) return toast.error('Please provide banner image');
-            if (!selectedOptions.length) return toast.error('Please select at least one topic');
 
             const formData = new FormData();
-            formData.append('title', title);
-            formData.append('content', content);
+            formData.append('blogId', id);
+            // check if title is changed
+            if (prevTitle !== title) {
+                formData.append('title', title);
+            }
+
+            // check if content is changed
+            if (prevContent !== content) {
+                console.log('content changed');
+                formData.append('content', content);
+            }
+            // check if tags is changed
             const tagValues = selectedOptions.map(option => option.value);
-            formData.append('tags', JSON.stringify(tagValues));
-            formData.append('bannerImage', bannerImage);
+            if (JSON.stringify(tags) !== JSON.stringify(tagValues)) {
+                formData.append('tags', JSON.stringify(tagValues));
+            }
+
+            if (tagValues.length <= 0) {
+                toast.error('Please select at least one topic');
+                return;
+            }
+
+            if (bannerImage) {
+                formData.append('bannerImage', bannerImage);
+            }
 
             const response = await fetchData({
-                url: '/api/blog/create-blog',
-                method: 'POST',
+                url: '/api/blog/edit-blog',
+                method: 'PUT',
                 data: formData,
                 headers: {
                     'Content-Type': 'multipart/form-data',
@@ -172,17 +152,18 @@ const BlogPreview = () => {
             });
             const { success, message } = handleResponse(response);
 
-            if (success) {
-                toast.success('Story created successfully');
+            if (success && message == "Blog updated successfully") {
+                toast.success('Story updated successfully');
                 dispatch(clearNewSotry());
                 navigate('/', { replace: true });
+
             } else {
                 toast.error(message);
             }
+
         } catch (error) {
             toast.error(error.message || "Something went wrong");
-        }
-        finally {
+        } finally {
             setLoading(false);
         }
     }
@@ -229,7 +210,7 @@ const BlogPreview = () => {
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setBannerImage(null);
-                                        setPreviewImage(null);
+                                        setPreviewImage(prevBannerImage);
                                         fileInputRef.current.value = '';
                                     }}
                                     aria-label="Remove image">
@@ -277,10 +258,6 @@ const BlogPreview = () => {
                         </div>
 
                         <div className="flex flex-col gap-3 mt-6">
-                            <button
-                                onClick={() => dispatch(setPageStep({ pageStep: 1 }))}
-                                className="w-full cursor-pointer py-3 bg-base-300 rounded-sm hover:bg-base-300 font-semibold capitalize text-sm">Back to editing
-                            </button>
                             <Button title='Publish' type='button' loading={loading} onClick={onPublish} />
                         </div>
                     </div>
@@ -290,4 +267,4 @@ const BlogPreview = () => {
     )
 }
 
-export default BlogPreview
+export default BlogEditPreview;

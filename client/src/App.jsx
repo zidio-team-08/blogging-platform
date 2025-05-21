@@ -16,6 +16,7 @@ const Profile = lazy(() => import("./pages/Profile"));
 const MyStories = lazy(() => import("./pages/MyStories"));
 const Saved = lazy(() => import("./pages/Saved"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
+const EditBlog = lazy(() => import("./pages/EditBlog"));
 
 // admin panel routes
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
@@ -94,6 +95,11 @@ const App = () => {
                         </ProtectedRoutes>
                     } />
 
+                    <Route path='/edit-blog/:id' element={
+                        <ProtectedRoutes>
+                            <EditBlog />
+                        </ProtectedRoutes>
+                    } />
 
                     {/* admin panel routes */}
                     <Route path='/admin/login' element={

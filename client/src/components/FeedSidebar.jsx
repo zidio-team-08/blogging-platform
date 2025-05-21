@@ -82,12 +82,12 @@ const FeedSidebar = () => {
                         </div>
                     ) : (
                         <>
-                            {popularPosts?.pages?.flatMap((page) => page?.data || []).map((post, index) => {
-                                return (
-                                    <li key={`${post.id}-${index}}`} className="list-row cursor-pointer hover:bg-base-200 p-3 rounded-md transition-colors" onClick={() => navigate(`/blog/${post.id}`)}>
+                            {popularPosts?.pages?.flatMap(page => page?.data || []).length > 0 ? (
+                                popularPosts?.pages?.flatMap(page => page?.data || []).map((post, index) => (
+                                    <li key={index} className="list-row p-3 rounded-md transition-colors" onClick={() => navigate(`/blog/${post.id}`)}>
                                         <div className="text-3xl font-bold text-primary/30 tabular-nums">0{index + 1}</div>
                                         <div className="list-col-grow ml-3">
-                                            <h2 className="text-base font-semibold">{post.title.slice(0, 50) + '...'}</h2>
+                                            <h2 className="text-base font-semibold">{post.title}</h2>
                                             <p className="text-xs mt-1 text-gray-600">{post.text}</p>
                                             <div className="flex items-center gap-2 mt-2">
                                                 <span className="text-xs font-medium text-primary">{post.author.name}</span>
@@ -95,25 +95,13 @@ const FeedSidebar = () => {
                                             </div>
                                         </div>
                                     </li>
-                                )
-                            })}
+                                ))
+                            ) : (
+                                <div className='w-full h-96 flex justify-center font-semibold mt-10'>No blogs found</div>
+                            )}
                         </>
                     )
                 }
-
-                {/* {popularPosts?.pages?.flatMap(page => page?.data || []).map((post, index) => (
-                    <li key={index} className="list-row p-3 rounded-md transition-colors">
-                        <div className="text-3xl font-bold text-primary/30 tabular-nums">0{index + 1}</div>
-                        <div className="list-col-grow ml-3">
-                            <h2 className="text-base font-semibold">{post.title}</h2>
-                            <p className="text-xs mt-1 text-gray-600">{post.text}</p>
-                            <div className="flex items-center gap-2 mt-2">
-                                <span className="text-xs font-medium text-primary">{post.author}</span>
-                                <span className="text-xs text-gray-500">• 2 days ago</span>
-                            </div>
-                        </div>
-                    </li>
-                ))} */}
             </ul>
         </div>
     )

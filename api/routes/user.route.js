@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import { changePassword, followUnfollow, getProfile, getUserDetailsByUsername, searchUser, updateProfile, uploadProfileImage } from '../controller/user.controller.js';
+import { changePassword, followUnfollow, getProfile, getUserBlogByUsername, getUserDetailsByUsername, searchUser, updateProfile, uploadProfileImage } from '../controller/user.controller.js';
 import { validateRequest } from "../middleware/errorMiddleware.js";
 import { validateChangePassword, validateUpdateProfile } from "../validator/auth.validator.js";
 import { uploadProfile } from "../middleware/upload.js";
@@ -29,6 +29,9 @@ router.get('/search', searchUser);
 
 // getUserDetailsByUsername
 router.get('/:username', getUserDetailsByUsername);
+
+// getUserBlogByUsername
+router.get('/blogs/:username', getUserBlogByUsername);
 
 export default router;
 

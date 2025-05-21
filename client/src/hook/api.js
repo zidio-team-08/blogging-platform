@@ -16,7 +16,7 @@ const useApi = () => {
             });
 
             const result = handleResponse(response);
-            const user = result.data.name || result.data.username;
+            const user = result?.data?.name || result?.data?.username || 'User';
             if (result.message == 'Followed successfully') {
                 toast.success(`You're now following ${user}`, {
                     id: toastId,
@@ -30,9 +30,9 @@ const useApi = () => {
                     id: toastId,
                 });
             }
-
-            return result.data.isFollowing;
+            return result?.data?.isFollowing || false;
         } catch (error) {
+            console.log('error', error);
             const { message } = handleResponse(error);
             toast.error(message);
         }
@@ -139,6 +139,36 @@ const useApi = () => {
             toast.error(message);
         }
     }
+
+    // delete blog
+    // const deleteBlog = async (blogId) => {
+    //     try {
+    //         const response = await fetchData({
+    //             url: `/api/blog/delete-blog/${blogId}`,
+    //             method: 'DELETE',
+    //         });
+
+    //         const { success, message } = handleResponse(response);
+
+    //         console.log(success, message);
+
+
+    //         if (!success) {
+    //             toast.error(message);
+    //             return;
+    //         }
+
+    //         toast.success('Story deleted successfully', {
+    //             id: toastId,
+    //         });
+
+    //         return true;
+    //     } catch (error) {
+    //         const { message } = handleResponse(error);
+    //         toast.error(message);
+    //     }
+    // }
+
 
     return { followUnfollow, postComment, likeUnlikeComment, likeUnlikeBlog, saveStory };
 }

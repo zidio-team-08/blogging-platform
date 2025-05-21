@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { FiEdit, FiUser, FiLock } from 'react-icons/fi'
 import { MdOutlineEmail } from 'react-icons/md'
 import { FaAt, FaFacebook, FaTwitter, FaYoutube, FaEye, FaEyeSlash } from 'react-icons/fa'
@@ -25,6 +25,7 @@ const Profile = () => {
     const { user } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
     const [imageLoading, setImageLoading] = useState(false);
+    const fileInputRef = useRef(null);
 
     // update profile form hook
     const { register: registerProfile, watch,
@@ -80,6 +81,7 @@ const Profile = () => {
             setImageFile(file);
         }
     };
+
 
     // onSubmitProfile
     const onSubmitProfile = async (data) => {
@@ -162,6 +164,7 @@ const Profile = () => {
                 ));
                 setImagePreview("");
                 setImageFile(null);
+                fileInputRef.current.value = '';
             } else {
                 toast.error(message);
             }
@@ -200,6 +203,7 @@ const Profile = () => {
                         id="profileImage"
                         accept="image/*"
                         className="hidden"
+                        ref={fileInputRef}
                         onChange={handleImageChange}
                     />
 

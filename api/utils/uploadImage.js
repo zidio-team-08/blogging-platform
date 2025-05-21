@@ -11,7 +11,6 @@ const profile_image_upload = async (file) => {
             width: 500,
             height: 500,
             crop: 'thumb',
-            gravity: 'face',
             quality: "auto:low",
             fetch_format: "webp"
          }

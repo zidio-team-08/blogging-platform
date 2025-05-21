@@ -23,7 +23,7 @@ const commentSchema = yup.object({
       .trim()
 });
 
-const StoryComment = ({ blogId }) => {
+const StoryComment = ({ blogId, userId, blogAuthorId }) => {
    const { fetchData } = useAxios();
    const { user } = useSelector((state) => state.auth);
    const queryClient = useQueryClient();
@@ -158,16 +158,27 @@ const StoryComment = ({ blogId }) => {
                {commentsData?.pages?.flatMap(page => page?.data || []).map((comment, index) => (
                   <div key={`${comment.id}-${index}`} className="flex gap-4">
                      <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 max-sm:hidden">
-                        <img
-                           src={comment?.author?.profileImage}
-                           alt={comment?.author?.name || comment?.author?.username}
-                           className="w-full h-full object-cover"
-                        />
+                        {
+                           comment?.author?.profileImage ? (
+                              <img
+                                 src={comment?.author?.profileImage}
+                                 alt={comment?.author?.name || comment?.author?.username}
+                                 className="w-full h-full object-cover"
+                              />
+                           ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                 <FiUser size={20} />
+                              </div>
+                           )
+                        }
                      </div>
                      <div className="flex-1">
                         <div className="bg-base-200 p-4 rounded-md border border-base-300">
                            <div className="flex items-center justify-between mb-2">
-                              <p className="font-medium">{comment?.author?.name || comment?.author?.username}</p>
+                              <p className="font-medium">
+                                 {userId === comment?.author?.id ? 'You'
+                                    : comment?.author?.name || comment?.author?.username}
+                              </p>
                               <span className="text-sm text-gray-400">{formatDate(comment.createdAt)}</span>
                            </div>
                            <p className="text-base-content">{comment.content}</p>

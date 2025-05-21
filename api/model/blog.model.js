@@ -32,10 +32,10 @@ const blogSchema = new mongoose.Schema({
         url: { type: String },
         public_id: { type: String }
     },
-    comments: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Comment',
-    }],
+    // comments: [{
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'Comment',
+    // }],
     likes: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

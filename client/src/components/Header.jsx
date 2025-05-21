@@ -21,6 +21,7 @@ const Header = () => {
             <div className="w-full h-14 bg-base-100 border border-base-300 flex items-center justify-between px-6 relative max-[810px]:px-4">
 
                 <div className='flex items-center gap-10'>
+                    {/* dont save history */}
                     <Link to='/'>
                         <h1 className='text-xl font-bold capitalize'>Blogs</h1>
                     </Link>

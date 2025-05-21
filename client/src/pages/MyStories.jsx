@@ -1,35 +1,78 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import useAxios from '../hook/useAxios';
+import StoryCard from '../components/StoryCard';
+import Loader from '../components/Loader';
+import ConfirmDelete from '../components/modal/ConfirmDelete';
+import useApi from '../hook/api';
+import toast from 'react-hot-toast';
+import { handleResponse } from '../utils/responseHandler';
 
 const MyStories = () => {
-    const [activeTab, setActiveTab] = useState("drafts");
-    const [stories, setStories] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-    const token = localStorage.getItem("token");
-    useEffect(() => {
-        const fetchStories = async () => {
-            try {
-                const response = await axios.get('/api/blog/mystories', {
-                    withCredentials: true, // if you're using cookies for auth
-                    headers: token ? {
-                        'Authorization': `Bearer ${token}`,
-                    } : {},
-                });
-                setStories(response.data.data);
-                setLoading(false);
-            } catch (err) {
-                setError("Failed to load stories.");
-                setLoading(false);
-            }
-        };
+    const [activeTab, setActiveTab] = useState("published");
+    const { fetchData } = useAxios();
+    const [isPublished, setIsPublished] = useState(true);
+    const [deleteBlogId, setDeleteBlogId] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const queryClient = useQueryClient();
 
-        fetchStories();
-    }, []);
+    const {
+        data: blogs,
+        isLoading,
+        isError,
+        error,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useInfiniteQuery({
+        queryKey: ["MY_STORIES", activeTab],
+        queryFn: async ({ pageParam = 1 }) => await fetchData({
+            url: `/api/blog/my-stories?isPublished=${isPublished}&page=${pageParam}&limit=10`,
+            method: 'GET',
+        }),
+        getNextPageParam: (lastPage, allPages) => {
+            return lastPage?.data?.length === 10 ? allPages.length + 1 : undefined;
+        },
+        initialPageParam: 1,
+        refetchOnWindowFocus: false,
+        enabled: !!activeTab,
+        staleTime: 0,
+        cacheTime: 0,
+    });
+
+
+    // handle delete blog
+    const confirmDeleteBlog = async (blogId) => {
+        setLoading(true);
+        try {
+
+            const response = await fetchData({
+                url: `/api/blog/delete-blog/${blogId}`,
+                method: 'DELETE',
+            });
+
+            const { success, message } = handleResponse(response);
+            if (success && message == "Post deleted successfully") {
+                toast.success('Story deleted successfully');
+                setDeleteBlogId(null);
+                queryClient.invalidateQueries({ queryKey: ["MY_STORIES", activeTab] });
+            } else {
+                toast.error(message);
+            }
+        } catch (error) {
+            const { message } = handleResponse(error);
+            toast.error(message);
+        } finally {
+            setLoading(false);
+        }
+
+    }
+
+
 
     return (
-        <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
+        <div className="max-w-4xl mx-auto px-4 py-6 md:py-8 min-h-screen">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 md:mb-8 gap-4">
                 <h1 className="text-2xl md:text-3xl font-bold text-base-content">My stories</h1>
                 <div className="flex flex-wrap gap-2 sm:gap-3">
@@ -42,48 +85,73 @@ const MyStories = () => {
             <div className="border-b border-base-300 mb-4 md:mb-6">
                 <nav className="flex -mb-px min-w-max">
                     <button
-                        onClick={() => setActiveTab("drafts")}
-                        className={`mr-4 sm:mr-8 py-3 md:py-4 text-sm md:text-base cursor-pointer ${activeTab === "drafts"
+                        onClick={() => { setActiveTab("published"); setIsPublished(true) }}
+                        className={`mr-4 sm:mr-8 py-3 md:py-4 text-sm md:text-base cursor-pointer ${activeTab == "published"
                             ? "text-base-content border-b-2 border-primary font-medium"
                             : "text-gray-500 hover:text-gray-700"
                             }`}
                     >
                         Published
                     </button>
+
+                    <button
+                        onClick={() => { setActiveTab("private"); setIsPublished(false) }}
+                        className={`mr-4 sm:mr-8 py-3 md:py-4 text-sm md:text-base cursor-pointer ${activeTab == "private"
+                            ? "text-base-content border-b-2 border-primary font-medium"
+                            : "text-gray-500 hover:text-gray-700"
+                            }`}>
+                        Private
+                    </button>
+
+                    <button
+                        onClick={() => { setActiveTab("saved"); setIsPublished(false) }}
+                        className={`mr-4 sm:mr-8 py-3 md:py-4 text-sm md:text-base cursor-pointer ${activeTab == "saved"
+                            ? "text-base-content border-b-2 border-primary font-medium"
+                            : "text-gray-500 hover:text-gray-700"
+                            }`}>
+                        Saved
+                    </button>
                 </nav>
             </div>
 
-            {loading ? (
-                <p>Loading stories...</p>
-            ) : error ? (
-                <p className="text-red-500">{error}</p>
-            ) : stories.length === 0 ? (
-                <p>No stories found.</p>
-            ) : (
-                <div className="space-y-4 md:space-y-6">
-                    {stories.map((story) => (
-                        <div key={story.id} className="py-3 md:py-4 border-b border-base-300 flex flex-col md:flex-row gap-4">
-                            <div className="flex-grow">
-                                <h2 className="text-lg md:text-xl font-medium text-base-content mb-1">
-                                    {story.title}
-                                </h2>
-                                <div className="flex flex-wrap items-center text-xs md:text-sm text-base-content">
-                                    <span>Created {new Date(story.createdAt).toLocaleDateString()}</span>
-                                </div>
+            {
+                isLoading ? (
+                    <div className='w-full h-50 flex items-center justify-center'>
+                        <Loader />
+                    </div>
+                ) : isError ? (
+                    <p className="text-red-500">{error?.message}</p>
+                ) : (
+                    <div className="space-y-4 md:space-y-6">
+                        {blogs?.pages?.flatMap(page => page?.data || []).length <= 0 ? (
+                            <div className='flex justify-center items-center h-50'>
+                                <p className='text-base-content/70 font-medium'>No stories found.</p>
                             </div>
-                            {story.bannerImage && (
-                                <div className="w-full md:w-24 h-20 rounded-sm overflow-hidden flex-shrink-0">
-                                    <img
-                                        src={story.bannerImage}
-                                        alt="Story cover"
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            )}
+                        ) : blogs?.pages?.flatMap(page => page?.data || []).map(blog => (
+                            <StoryCard
+                                key={blog.id}
+                                blog={blog}
+                                isFetching={isFetchingNextPage}
+                                maxWidth='100%'
+                                isAutherVisible={false}
+                                isOpenFullBlog={false}
+                                isMenuShow={true}
+                                getBlogId={(id) => setDeleteBlogId(id)}
+                            />
+                        ))}
+                    </div>
+                )
+            }
+
+
+            <ConfirmDelete
+                showModel={deleteBlogId !== null}
+                onClose={() => setDeleteBlogId(null)}
+                onConfirm={() => confirmDeleteBlog(deleteBlogId)}
+                loading={loading}
+                message='Are you sure you want to delete this story?'
+            />
+
         </div>
     );
 };

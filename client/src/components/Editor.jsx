@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setContent, setPageStep, setTitle } from '../features/blogSlice'
 import Button from './Button'
 
-const Editor = () => {
+const Editor = ({ blogTitle, blogContent }) => {
 
     const quillRef = useRef(null);
     const editorRef = useRef(null);
@@ -15,6 +15,7 @@ const Editor = () => {
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
     const { title, content, pageStep } = useSelector((state) => state.newStory);
+
 
     useEffect(() => {
         if (!quillRef.current) {
@@ -33,13 +34,18 @@ const Editor = () => {
                 }
             })
             quillRef.current = editorRef.current
-
             // Set initial content if available
             if (content) {
                 quillRef.current.root.innerHTML = content
             }
         }
     }, [content]);
+
+    useEffect(() => {
+        if (quillRef.current && blogContent) {
+            quillRef.current.root.innerHTML = blogContent;
+        }
+    }, [blogContent]);
 
 
     const handleNext = async () => {
@@ -72,7 +78,7 @@ const Editor = () => {
         <>
             <textarea
                 ref={titleInputRef}
-                defaultValue={title}
+                defaultValue={title || blogTitle}
                 className="textarea mb-7 w-full resize-none rounded-sm text-2xl font-bold border-none bg-base-200 focus:outline-none focus:ring-0 focus:border-primary pl-4 font3"
                 placeholder="Enter Your Title"
                 style={{ overflow: 'hidden' }}

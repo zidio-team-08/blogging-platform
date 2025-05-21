@@ -84,7 +84,7 @@ export const fetchBlogComments = async (req, res, next) => {
                     id: userId._id,
                     name: userId.name,
                     username: userId.username,
-                    profileImage: userId.profileImage.url,
+                    profileImage: userId?.profileImage?.url,
                 }
             };
         });
