@@ -10,6 +10,7 @@ import useAxios from '../../hook/useAxios';
 import { handleResponse } from '../../utils/responseHandler';
 import toast from 'react-hot-toast';
 
+
 // Admin login schema
 const adminLoginSchema = yup.object({
     email: yup.string().email('Invalid email format').required('Please enter email'),
@@ -32,7 +33,7 @@ const AdminLogin = () => {
         setLoading(true);
         try {
             const response = await fetchData({
-                url: '/api/admin/login',
+                url: '/api/admin/auth/login',
                 method: 'POST',
                 data
             });

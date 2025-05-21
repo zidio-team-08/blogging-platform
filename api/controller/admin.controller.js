@@ -496,7 +496,7 @@ export const updateBlog = async (req, res, next) => {
             content: blog.content,
             tags: blog.tags,
             author: blog.author,
-            bannerImage: blog.bannerImage.url,
+             bannerImage: blog.bannerImage?.url || null,
             likes: blog.likes.length,
             comments: blog.comments.length,
             createdAt: blog.createdAt,

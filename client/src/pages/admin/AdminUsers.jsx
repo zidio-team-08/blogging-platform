@@ -1,210 +1,153 @@
+import React, { useState } from 'react';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 
-import React, { useState, useEffect } from 'react'
-import AdminSidebar from '../../components/admin-components/AdminSidebar'
-import AdminHeader from '../../components/admin-components/AdminHeader'
-import { FiSearch, FiEdit, FiTrash2 } from 'react-icons/fi';
-import { MdBlock } from 'react-icons/md';
-import SearchUserInput from '../../components/admin-components/SearchUserInput';
-import Confirm from '../../components/modal/Confirm';
-import UserEditModal from '../../components/modal/UserEditModal';
+const fetchBlogs = async () => {
+  const res = await fetch('/blogs');
+  if (!res.ok) throw new Error('Failed to fetch blogs');
+  return res.json();
+};
 
+const fetchBlogDetails = async (blogId) => {
+  const res = await fetch(`/blog/${blogId}`);
+  if (!res.ok) throw new Error('Failed to fetch blog');
+  return res.json();
+};
 
-const allusers = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', joinedAt: '2023-05-15', status: 'active', avatar: 'https://randomuser.me/api/portraits/men/1.jpg' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', joinedAt: '2023-05-14', status: 'active', avatar: 'https://randomuser.me/api/portraits/women/2.jpg' },
-    { id: 3, name: 'Robert Johnson', email: 'robert@example.com', joinedAt: '2023-05-13', status: 'inactive', avatar: 'https://randomuser.me/api/portraits/men/3.jpg' },
-    { id: 4, name: 'Emily Davis', email: 'emily@example.com', joinedAt: '2023-05-12', status: 'inactive', avatar: 'https://randomuser.me/api/portraits/women/4.jpg' },
-    { id: 5, name: 'Michael Wilson', email: 'michael@example.com', joinedAt: '2023-05-11', status: 'active', avatar: 'https://randomuser.me/api/portraits/men/5.jpg' },
-    { id: 6, name: 'Sarah Brown', email: 'sarah@example.com', joinedAt: '2023-05-10', status: 'active', avatar: 'https://randomuser.me/api/portraits/women/6.jpg' },
-    { id: 7, name: 'David Miller', email: 'david@example.com', joinedAt: '2023-05-09', status: 'blocked', avatar: 'https://randomuser.me/api/portraits/men/7.jpg' },
-    { id: 8, name: 'Lisa Taylor', email: 'lisa@example.com', joinedAt: '2023-05-08', status: 'active', avatar: 'https://randomuser.me/api/portraits/women/8.jpg' },
-    { id: 9, name: 'James Anderson', email: 'james@example.com', joinedAt: '2023-05-07', status: 'active', avatar: 'https://randomuser.me/api/portraits/men/9.jpg' },
-    { id: 10, name: 'Jennifer White', email: 'jennifer@example.com', joinedAt: '2023-05-06', status: 'inactive', avatar: 'https://randomuser.me/api/portraits/women/10.jpg' },
-    { id: 11, name: 'Thomas Harris', email: 'thomas@example.com', joinedAt: '2023-05-05', status: 'active', avatar: 'https://randomuser.me/api/portraits/men/11.jpg' },
-    { id: 12, name: 'Jessica Martin', email: 'jessica@example.com', joinedAt: '2023-05-04', status: 'blocked', avatar: 'https://randomuser.me/api/portraits/women/12.jpg' },
-]
+const AdminBlog = () => {
+  const queryClient = useQueryClient();
+  const [selectedBlogId, setSelectedBlogId] = useState(null);
+  const [form, setForm] = useState({ title: '', content: '', bannerImage: null });
 
-const AdminUsers = () => {
-    const [users, setUsers] = useState(allusers)
-    const [loading, setLoading] = useState(false)
-    const [searchTerm, setSearchTerm] = useState('')
-    const [currentPage, setCurrentPage] = useState(1)
-    const [totalPages, setTotalPages] = useState(1)
-    const usersPerPage = 10;
-    const [showModel, setShowModel] = useState(false);
-    const [showEditModel, setShowEditModel] = useState(false);
-    const [selectedUser, setSelectedUser] = useState("");
+  // Fetch all blogs
+  const { data: blogs, isLoading, error } = useQuery(['blogs'], fetchBlogs);
 
-    // Filter users based on search term
-    const filteredUsers = users.filter(user =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (blogId) => {
+      const res = await fetch(`/blog/delete/${blogId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Delete failed');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['blogs']);
+    },
+  });
 
-    // Get current users for pagination
-    const indexOfLastUser = currentPage * usersPerPage
-    const indexOfFirstUser = indexOfLastUser - usersPerPage
-    const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser)
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: async (data) => {
+      const formData = new FormData();
+      formData.append('blogId', data.blogId);
+      formData.append('title', data.title);
+      formData.append('content', data.content);
+      if (data.bannerImage) formData.append('bannerImage', data.bannerImage);
 
-    // Get user initials for avatar fallback
-    const getUserInitials = (name) => {
-        return name.split(' ').map(n => n[0]).join('').toUpperCase()
+      const res = await fetch('/blog/update-blog', {
+        method: 'PUT',
+        body: formData,
+      });
+      if (!res.ok) throw new Error('Update failed');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['blogs']);
+      setSelectedBlogId(null);
+      setForm({ title: '', content: '', bannerImage: null });
+    },
+  });
+
+  const handleEdit = async (blogId) => {
+    try {
+      const data = await fetchBlogDetails(blogId);
+      setSelectedBlogId(blogId);
+      setForm({ title: data.title, content: data.content, bannerImage: null });
+    } catch (err) {
+      console.error(err);
     }
+  };
 
-    // Handle page change
-    const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-    // blockUserhandler
-    // const blockUserhandler = () => {
-    // }
-
-    const blockUserhandler = () => {
-        setShowModel(false)
+  const handleFormChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === 'bannerImage') {
+      setForm((prev) => ({ ...prev, bannerImage: files[0] }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
     }
+  };
 
-    return (
-        <div className="w-full h-full">
-            <div className="flex flex-col md:flex-row">
-                <div className="flex-1 xl:ml-64 p-3 sm:p-4 md:p-6 overflow-auto">
-                    <div className="mb-4 sm:mb-6">
-                        <h1 className="text-xl sm:text-md capitalize font-bold text-base-content">Users Management</h1>
-                        <p className="text-base-content/80 text-sm mt-1 font-semibold">Manage all users in the system</p>
-                    </div>
-                    {/* Search and Filter */}
-                    <SearchUserInput />
-                    {loading ? (
-                        <div className="flex justify-center items-center h-64">
-                            <div className="loading loading-spinner loading-lg"></div>
-                        </div>
-                    ) : (
-                        <>
-                            {/* Users Table */}
-                            <div className="bg-base-100 rounded-sm border border-base-300 overflow-hidden">
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-base-300">
-                                        <thead className="bg-base-100">
-                                            <tr>
-                                                <th className="px-3 sm:px-6 py-2 sm:py-4 text-left text-xs font-semibold text-base-content capitalize tracking-wider">User</th>
-                                                <th className="px-3 sm:px-6 py-2 sm:py-4 text-left text-xs font-semibold text-base-content capitalize tracking-wider">Email</th>
-                                                <th className="px-3 sm:px-6 py-2 sm:py-4 text-left text-xs font-semibold text-base-content capitalize tracking-wider">Joined</th>
-                                                <th className="px-3 sm:px-6 py-2 sm:py-4 text-left text-xs font-semibold text-base-content capitalize tracking-wider">Status</th>
-                                                <th className="px-3 sm:px-6 py-2 sm:py-4 text-left text-xs font-semibold text-base-content capitalize tracking-wider">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-base-100 divide-y divide-base-300">
-                                            {currentUsers.length > 0 ? (
-                                                currentUsers.map(user => (
-                                                    <tr key={user.id}>
-                                                        <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                                                            <div className="flex items-center">
-                                                                <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
-                                                                    {user.avatar ? (
-                                                                        <img className="h-8 w-8 sm:h-10 sm:w-10 rounded-full" src={user.avatar} alt={user.name} />
-                                                                    ) : (
-                                                                        <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary text-white flex items-center justify-center">
-                                                                            {getUserInitials(user.name)}
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                                <div className="ml-2 sm:ml-4">
-                                                                    <div className="text-xs sm:text-sm font-medium text-base-content">{user.name}</div>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                                                            <div className="text-xs sm:text-sm text-base-content">{user.email}</div>
-                                                        </td>
-                                                        <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                                                            <div className="text-xs sm:text-sm text-base-content">{new Date(user.joinedAt).toLocaleDateString()}</div>
-                                                        </td>
-                                                        <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
-                                                            <div className={`text-xs sm:text-sm ${user.status === 'active' ? 'text-green-500' : 'text-red-500'}`}>{user.status}</div>
-                                                        </td>
-                                                        <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
-                                                            <div className="flex space-x-2">
-                                                                <div className='tooltip' data-tip="Edit User">
-                                                                    <button onClick={() => {
-                                                                        setSelectedUser(user);
-                                                                        setShowEditModel(true);
-                                                                    }} type='button' className="text-blue-600 cursor-pointer hover:bg-base-300 p-2 rounded-sm">
-                                                                        <FiEdit size={16} />
-                                                                    </button>
-                                                                </div>
-                                                                <div className="tooltip" data-tip="Block User">
-                                                                    <button onClick={() => {
-                                                                        setSelectedUser(user);
-                                                                        setShowModel(true);
-                                                                    }} type='button' data-tooltip-id='block-user-tooltip' className="text-red-600 cursor-pointer hover:bg-base-300 p-2 rounded-sm">
-                                                                        <MdBlock size={16} />
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan="5" className="px-3 sm:px-6 py-4 text-center text-sm text-gray-500">
-                                                        No users found matching your search criteria
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+  const handleUpdate = (e) => {
+    e.preventDefault();
+    updateMutation.mutate({
+      blogId: selectedBlogId,
+      ...form,
+    });
+  };
 
-                            {/* Pagination */}
-                            {filteredUsers.length > 0 && (
-                                <div className="flex justify-center mt-4 sm:mt-6">
-                                    <div className="join">
-                                        <button
-                                            className="join-item btn btn-sm"
-                                            onClick={() => paginate(Math.max(1, currentPage - 1))}
-                                        // disabled={currentPage === 1}
-                                        >
-                                            «
-                                        </button>
-                                        {[...Array(totalPages).keys()].map(number => (
-                                            <button
-                                                key={number + 1}
-                                                onClick={() => paginate(number + 1)}
-                                                className={`join-item btn btn-sm ${currentPage === number + 1 ? 'btn-active' : ''}`}>
-                                                {number + 1}
-                                            </button>
-                                        ))}
-                                        <button
-                                            className="join-item btn btn-sm"
-                                            onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
-                                        // disabled={currentPage === totalPages}
-                                        >
-                                            »
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
-            </div>
+  if (isLoading) return <div>Loading blogs...</div>;
+  if (error) return <div>Error loading blogs</div>;
 
-            {/*  */}
-            <UserEditModal
-                showEditModel={showEditModel}
-                setShowEditModel={setShowEditModel}
-                selectedUser={selectedUser}
-                setSelectedUser={setSelectedUser} />
-            <Confirm
-                showModel={showModel}
-                setShowModel={setShowModel}
-                selectedUser={selectedUser}
-                setSelectedUser={setSelectedUser}
-                title="Confirmation Required"
-                message="Are you sure you want to block this user?"
-                className='text-white hover:bg-red-600 bg-red-500'
-                onConfirm={blockUserhandler} />
+  return (
+    <div className="p-4 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Admin Blog Panel</h1>
+
+      {blogs.map((blog) => (
+        <div key={blog._id} className="border p-4 mb-4 rounded shadow">
+          <h2 className="text-xl font-semibold">{blog.title}</h2>
+          <p className="text-gray-700">{blog.content.slice(0, 100)}...</p>
+          <div className="mt-2 space-x-2">
+            <button
+              onClick={() => handleEdit(blog._id)}
+              className="bg-yellow-500 text-white px-3 py-1 rounded"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => deleteMutation.mutate(blog._id)}
+              className="bg-red-600 text-white px-3 py-1 rounded"
+            >
+              Delete
+            </button>
+          </div>
         </div>
-    )
-}
+      ))}
 
-export default AdminUsers
+      {selectedBlogId && (
+        <form onSubmit={handleUpdate} className="mt-6 p-4 border rounded shadow">
+          <h2 className="text-lg font-semibold mb-2">Edit Blog</h2>
+          <input
+            type="text"
+            name="title"
+            value={form.title}
+            onChange={handleFormChange}
+            placeholder="Title"
+            className="w-full mb-2 p-2 border rounded"
+            required
+          />
+          <textarea
+            name="content"
+            value={form.content}
+            onChange={handleFormChange}
+            placeholder="Content"
+            className="w-full mb-2 p-2 border rounded"
+            rows={5}
+            required
+          />
+          <input
+            type="file"
+            name="bannerImage"
+            accept="image/*"
+            onChange={handleFormChange}
+            className="mb-2"
+          />
+          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
+            Update Blog
+          </button>
+        </form>
+      )}
+    </div>
+  );
+};
+
+export default AdminBlog;
