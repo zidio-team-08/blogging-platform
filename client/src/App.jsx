@@ -14,7 +14,6 @@ import AdminBlogs from './pages/admin/AdminBlogs';
 import Search from './pages/Search';
 const Profile = lazy(() => import("./pages/Profile"));
 const MyStories = lazy(() => import("./pages/MyStories"));
-const Saved = lazy(() => import("./pages/Saved"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
 const EditBlog = lazy(() => import("./pages/EditBlog"));
 
@@ -75,12 +74,6 @@ const App = () => {
                     <Route path='/my-stories' element={
                         <ProtectedRoutes>
                             <MyStories />
-                        </ProtectedRoutes>
-                    } />
-
-                    <Route path='/saved' element={
-                        <ProtectedRoutes>
-                            <Saved />
                         </ProtectedRoutes>
                     } />
 

@@ -1,20 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React from 'react'
 import Editor from '../components/Editor';
 import BlogPreview from '../components/BlogPreview';
 import { useSelector } from 'react-redux';
+import HelmetComponent from '../seo/Helmet';
 
 const NewStory = () => {
-    const { pageStep, title, content } = useSelector((state) => state.newStory);
+    const { pageStep } = useSelector((state) => state.newStory);
 
-    const removeTag = (tagToRemove) => {
-        setTags(tags.filter(tag => tag !== tagToRemove))
-    }
-
-    const handleNext = () => {
-    }
 
     return (
         <>
+            <HelmetComponent
+                title='New Story - Blogs'
+                description='Write a new story'
+            />
             <div className="max-w-6xl mx-auto  px-5 py-8">
                 <div className='max-w-4xl mx-auto '>
                     <div className='w-full flex items-center justify-center'>

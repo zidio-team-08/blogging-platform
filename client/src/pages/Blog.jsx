@@ -12,6 +12,7 @@ import useApi from '../hook/api';
 import { setBlogLike, setFollowingStatus } from '../features/userActionsSlice';
 import toast from 'react-hot-toast';
 import RelatedBlogsLoader from '../components/Loaders/relatedBlogsLoader';
+import HelmetComponent from '../seo/Helmet';
 
 const LikeButton = ({ likes, isLiked, onLike }) => {
     return (
@@ -198,6 +199,10 @@ const Blog = () => {
 
     return (
         <>
+            <HelmetComponent
+                title={blog?.data?.title || 'Blog - Blogs'}
+                description={blog?.data?.content.slice(0, 100) + '...'}
+            />
             <div className="max-w-4xl mx-auto px-4 py-8">
                 <div className="flex flex-wrap gap-2 mb-4 mt-5">
                     {blog?.data?.tags?.map((tag, index) => (

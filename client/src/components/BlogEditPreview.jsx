@@ -259,6 +259,10 @@ const BlogEditPreview = ({
 
                         <div className="flex flex-col gap-3 mt-6">
                             <Button title='Publish' type='button' loading={loading} onClick={onPublish} />
+                            <button
+                                onClick={() => dispatch(setPageStep({ pageStep: 1 }))}
+                                className="w-full cursor-pointer py-3 bg-base-300 rounded-sm hover:bg-base-300 font-semibold capitalize text-sm">Back to editing
+                            </button>
                         </div>
                     </div>
                 </div>

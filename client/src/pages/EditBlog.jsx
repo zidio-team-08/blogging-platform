@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { handleResponse } from '../utils/responseHandler';
 import Loader from '../components/Loader';
 import BlogEditPreview from '../components/BlogEditPreview';
+import HelmetComponent from '../seo/Helmet';
 
 const EditBlog = () => {
     const { pageStep } = useSelector((state) => state.newStory);
@@ -60,34 +61,36 @@ const EditBlog = () => {
     )
 
     return (
-        <div className="max-w-6xl mx-auto  px-5 py-8">
-            <div className='max-w-4xl mx-auto '>
-                <div className='w-full flex items-center justify-center'>
-                    <ul className="steps w-full mb-10">
-                        <li className={`step text-sm font-semibold ${pageStep >= 1 && ' step-primary'}`}>Edit story</li>
-                        <li className={`step text-sm font-semibold ${pageStep >= 2 && ' step-primary'}`}>Preview</li>
-                        <li className={`step text-sm font-semibold ${pageStep == 3 && ' step-primary'}`}>Done</li>
-                    </ul>
+        <>
+            <HelmetComponent
+                title='Edit Story - Blogs'
+                description='Edit your story'
+            />
+            <div className="max-w-6xl mx-auto  px-5 py-8">
+                <div className='max-w-4xl mx-auto '>
+                    <div className='w-full flex items-center justify-center'>
+                        <ul className="steps w-full mb-10">
+                            <li className={`step text-sm font-semibold ${pageStep >= 1 && ' step-primary'}`}>Edit story</li>
+                            <li className={`step text-sm font-semibold ${pageStep >= 2 && ' step-primary'}`}>Preview</li>
+                            <li className={`step text-sm font-semibold ${pageStep == 3 && ' step-primary'}`}>Done</li>
+                        </ul>
+                    </div>
+                    {/* editor step 1 */}
+                    {pageStep == 1 && (<Editor blogTitle={blogTitle} blogContent={blogContent} />)}
                 </div>
-                {/* editor step 1 */}
-                {pageStep == 1 && (<Editor blogTitle={blogTitle} blogContent={blogContent} />)}
+
+                {
+                    pageStep == 2 && isEditPath ?
+                        <BlogEditPreview
+                            prevTitle={blogTitle}
+                            prevContent={blogContent}
+                            bannerImage={bannerImage}
+                            tags={tags} /> :
+                        pageStep == 2 &&
+                        <BlogPreview />
+                }
             </div>
-
-            {
-                pageStep == 2 && isEditPath ?
-                    <BlogEditPreview
-                        prevTitle={blogTitle}
-                        prevContent={blogContent}
-                        bannerImage={bannerImage}
-                        tags={tags} /> :
-                    pageStep == 2 &&
-                    <BlogPreview />
-            }
-
-            {/* preview step 2 */}
-            {/* // {pageStep == 2 && (<BlogPreview />)} */}
-
-        </div>
+        </>
     )
 }
 

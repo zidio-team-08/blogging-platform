@@ -3,6 +3,7 @@ import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import Feed from '../components/Feed';
 import FeedSidebar from '../components/FeedSidebar';
 import { useSearchParams } from 'react-router-dom';
+import HelmetComponent from '../seo/Helmet';
 
 const Home = () => {
 
@@ -42,6 +43,10 @@ const Home = () => {
 
     return (
         <>
+            <HelmetComponent
+                title='Home - Blogs'
+                description='Home page of the website'
+            />
             <div className='w-full bg-base-100 flex justify-center'>
                 <div className='w-full max-w-[968px] min-h-screen'>
                     <div className='w-full max-w-[700px] mx-auto mb-6 sticky top-0 bg-base-100 z-20 py-2 border-b border-base-300'>
