@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import useAxios from '../hook/useAxios';
 import StoryCard from '../components/StoryCard';
@@ -11,12 +11,14 @@ import { handleResponse } from '../utils/responseHandler';
 import StoryCardLoader from '../components/Loaders/StoryCardLoader';
 
 const MyStories = () => {
-    const [activeTab, setActiveTab] = useState("published");
+    // const [activeTab, setActiveTab] = useState("published");
     const { fetchData } = useAxios();
     const [isPublished, setIsPublished] = useState(true);
     const [deleteBlogId, setDeleteBlogId] = useState(null);
     const [loading, setLoading] = useState(false);
     const queryClient = useQueryClient();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeTab = searchParams.get('tab') || "published";
 
     const {
         data: blogs,
@@ -26,7 +28,6 @@ const MyStories = () => {
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
-        isFetching,
     } = useInfiniteQuery({
         queryKey: ["MY_STORIES", activeTab],
         queryFn: async ({ pageParam = 1 }) => await fetchData({
@@ -49,9 +50,6 @@ const MyStories = () => {
         isLoading: savedBlogsLoading,
         isError: savedBlogsIsError,
         error: savedBlogsError,
-        // isFetchingNextPage: isFetchingSavedBlogs,
-        fetchNextPage: fetchNextSavedPage,
-        hasNextPage: hasNextSavedPage,
         isFetching: isFetchingSavedBlogs,
     } = useInfiniteQuery({
         queryKey: ["SAVED_BLOGS"],
@@ -68,6 +66,20 @@ const MyStories = () => {
         staleTime: 0,
         cacheTime: 0,
     });
+
+    // handle set active tab 
+    const handleSetActiveTab = (tab) => {
+        const tabs = ["published", "private", "saved"];
+        if (!tabs.includes(tab)) return;
+        setSearchParams({ tab });
+        if (tab == "published") {
+            setIsPublished(true);
+        } else if (tab == "private") {
+            setIsPublished(false);
+        } else if (tab == "saved") {
+            setIsPublished(false);
+        }
+    }
 
 
     // handle delete blog
@@ -111,7 +123,7 @@ const MyStories = () => {
             <div className="border-b border-base-300 mb-4 md:mb-6">
                 <nav className="flex -mb-px min-w-max">
                     <button
-                        onClick={() => { setActiveTab("published"); setIsPublished(true) }}
+                        onClick={() => handleSetActiveTab("published")}
                         className={`mr-4 sm:mr-8 py-3 md:py-4 text-sm md:text-base cursor-pointer ${activeTab == "published"
                             ? "text-base-content border-b-2 border-primary font-medium"
                             : "text-gray-500 hover:text-gray-700"
@@ -121,7 +133,7 @@ const MyStories = () => {
                     </button>
 
                     <button
-                        onClick={() => { setActiveTab("private"); setIsPublished(false) }}
+                        onClick={() => handleSetActiveTab("private")}
                         className={`mr-4 sm:mr-8 py-3 md:py-4 text-sm md:text-base cursor-pointer ${activeTab == "private"
                             ? "text-base-content border-b-2 border-primary font-medium"
                             : "text-gray-500 hover:text-gray-700"
@@ -130,7 +142,7 @@ const MyStories = () => {
                     </button>
 
                     <button
-                        onClick={() => { setActiveTab("saved"); setIsPublished(false) }}
+                        onClick={() => handleSetActiveTab("saved")}
                         className={`mr-4 sm:mr-8 py-3 md:py-4 text-sm md:text-base cursor-pointer ${activeTab == "saved"
                             ? "text-base-content border-b-2 border-primary font-medium"
                             : "text-gray-500 hover:text-gray-700"
@@ -185,11 +197,7 @@ const MyStories = () => {
                                             ? 'Show More Blogs' : 'No more blogs'}
                                 </button>
                             </div>
-                        ) : (
-                            <div className="flex justify-center my-8">
-                                <h5 className='text-base-content/70 font-medium'>No more blogs</h5>
-                            </div>
-                        )}
+                        ) : ""}
                     </>
                 )}
             </> : <>
