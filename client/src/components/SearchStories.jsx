@@ -4,6 +4,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import useAxios from '../hook/useAxios';
 import Loader from './Loader';
 import StoryCard from './StoryCard';
+import StoryCardLoader from './Loaders/StoryCardLoader';
 
 const SearchStories = () => {
 
@@ -37,9 +38,7 @@ const SearchStories = () => {
     return (
         <>
             {isLoading ? (
-                <div className='w-full h-96 flex items-center justify-center'>
-                    <Loader />
-                </div>
+                <StoryCardLoader length={5} />
             ) : isError ? (
                 <div className='w-full h-96 flex items-center justify-center font-semibold'>
                     {error?.message || "Something went wrong"}

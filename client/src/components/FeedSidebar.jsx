@@ -87,7 +87,7 @@ const FeedSidebar = () => {
                                     <li key={index} className="list-row p-3 rounded-md transition-colors" onClick={() => navigate(`/blog/${post.id}`)}>
                                         <div className="text-3xl font-bold text-primary/30 tabular-nums">0{index + 1}</div>
                                         <div className="list-col-grow ml-3">
-                                            <h2 className="text-base font-semibold">{post.title}</h2>
+                                            <h2 className="text-base font-semibold">{post?.title?.slice(0, 30) + '...'}</h2>
                                             <p className="text-xs mt-1 text-gray-600">{post.text}</p>
                                             <div className="flex items-center gap-2 mt-2">
                                                 <span className="text-xs font-medium text-primary">{post.author.name}</span>

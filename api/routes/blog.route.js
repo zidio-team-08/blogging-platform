@@ -1,5 +1,5 @@
 import express from 'express';
-import { blogLikeUnlike, createNewStory, deleteBlog, editStory, getBlogs, searchBlog, getUserBlogs, getBlogDetailsById, popularPosts, getMyStories } from '../controller/blog.controller.js';
+import { blogLikeUnlike, createNewStory, deleteBlog, editStory, getBlogs, searchBlog, getUserBlogs, getBlogDetailsById, popularPosts, getMyStories, getSavedBlogs, blogVisibilityChange } from '../controller/blog.controller.js';
 import isAuth from '../middleware/authMiddleware.js';
 import { uploadProfile } from '../middleware/upload.js';
 import { limiter } from '../config/rate.limiter.js';
@@ -31,6 +31,13 @@ router.get('/popular', isAuth, popularPosts);
 
 // get my stories
 router.get('/my-stories', isAuth, getMyStories);
+
+// get all saved blogs
+router.get('/saved-blogs', isAuth, getSavedBlogs);
+
+
+// get blog visibility status
+router.put('/visibility-change', isAuth, blogVisibilityChange);
 
 // get blog details by id 
 router.get('/:blogId', isAuth, getBlogDetailsById);

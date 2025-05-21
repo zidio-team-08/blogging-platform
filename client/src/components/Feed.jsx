@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import StoryCard from './StoryCard';
 import { handlePageScroller } from '../utils/scrollhandler';
+import StoryCardLoader from './Loaders/StoryCardLoader';
 
 const Feed = () => {
     const { fetchData } = useAxios();
@@ -59,9 +60,7 @@ const Feed = () => {
     return (
         <>
             {isLoading ? (
-                <div className='w-full h-96 flex items-center justify-center'>
-                    <Loader />
-                </div>
+                <StoryCardLoader maxWidth='680px' length={5} />
             ) : isError ? (
                 <div className='w-full h-96 flex items-center justify-center font-semibold'>
                     {error?.message || "Something went wrong"}

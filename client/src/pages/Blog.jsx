@@ -175,6 +175,27 @@ const Blog = () => {
         );
     }
 
+    if (isError) {
+        return (
+            <>
+                <div className="w-full min-h-screen flex items-center justify-center">
+                    <p className="text-2xl font-bold">Error: {error.message}</p>
+                </div>
+            </>
+        );
+    }
+
+    if (blog.success == false) {
+        return (
+            <>
+                <div className="w-full min-h-screen flex items-center justify-center">
+                    <p className="text-2xl font-bold">Error: {blog.message}</p>
+                </div>
+            </>
+        );
+    }
+
+
     return (
         <>
             <div className="max-w-4xl mx-auto px-4 py-8">

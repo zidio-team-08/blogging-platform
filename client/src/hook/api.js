@@ -140,37 +140,37 @@ const useApi = () => {
         }
     }
 
-    // delete blog
-    // const deleteBlog = async (blogId) => {
-    //     try {
-    //         const response = await fetchData({
-    //             url: `/api/blog/delete-blog/${blogId}`,
-    //             method: 'DELETE',
-    //         });
+    const blogVisibilityChange = async (blogId) => {
+        try {
+            const response = await fetchData({
+                url: '/api/blog/visibility-change',
+                method: 'PUT',
+                data: { blogId }
+            });
 
-    //         const { success, message } = handleResponse(response);
+            const { success, message } = handleResponse(response);
 
-    //         console.log(success, message);
+            if (!success) {
+                toast.error(message, {
+                    id: toastId,
+                });
+                return;
+            }
+
+            toast.success('Updated successfully', {
+                id: toastId,
+            });
+
+            return response.data.isPublished;
+        } catch (error) {
+            const { message } = handleResponse(error);
+            toast.error(message);
+        }
+    }
 
 
-    //         if (!success) {
-    //             toast.error(message);
-    //             return;
-    //         }
 
-    //         toast.success('Story deleted successfully', {
-    //             id: toastId,
-    //         });
-
-    //         return true;
-    //     } catch (error) {
-    //         const { message } = handleResponse(error);
-    //         toast.error(message);
-    //     }
-    // }
-
-
-    return { followUnfollow, postComment, likeUnlikeComment, likeUnlikeBlog, saveStory };
+    return { followUnfollow, postComment, likeUnlikeComment, likeUnlikeBlog, saveStory, blogVisibilityChange };
 }
 
 export default useApi;

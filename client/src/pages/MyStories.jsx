@@ -8,6 +8,7 @@ import ConfirmDelete from '../components/modal/ConfirmDelete';
 import useApi from '../hook/api';
 import toast from 'react-hot-toast';
 import { handleResponse } from '../utils/responseHandler';
+import StoryCardLoader from '../components/Loaders/StoryCardLoader';
 
 const MyStories = () => {
     const [activeTab, setActiveTab] = useState("published");
@@ -25,6 +26,7 @@ const MyStories = () => {
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
+        isFetching,
     } = useInfiniteQuery({
         queryKey: ["MY_STORIES", activeTab],
         queryFn: async ({ pageParam = 1 }) => await fetchData({
@@ -36,7 +38,33 @@ const MyStories = () => {
         },
         initialPageParam: 1,
         refetchOnWindowFocus: false,
-        enabled: !!activeTab,
+        enabled: activeTab == "published" || activeTab == "private",
+        staleTime: 0,
+        cacheTime: 0,
+    });
+
+    // get saved blogs
+    const {
+        data: savedBlogs,
+        isLoading: savedBlogsLoading,
+        isError: savedBlogsIsError,
+        error: savedBlogsError,
+        // isFetchingNextPage: isFetchingSavedBlogs,
+        fetchNextPage: fetchNextSavedPage,
+        hasNextPage: hasNextSavedPage,
+        isFetching: isFetchingSavedBlogs,
+    } = useInfiniteQuery({
+        queryKey: ["SAVED_BLOGS"],
+        queryFn: async ({ pageParam = 1 }) => await fetchData({
+            url: `/api/blog/saved-blogs?page=${pageParam}&limit=10`,
+            method: 'GET',
+        }),
+        getNextPageParam: (lastPage, allPages) => {
+            return lastPage?.data?.length === 10 ? allPages.length + 1 : undefined;
+        },
+        initialPageParam: 1,
+        refetchOnWindowFocus: false,
+        enabled: activeTab == "saved",
         staleTime: 0,
         cacheTime: 0,
     });
@@ -68,8 +96,6 @@ const MyStories = () => {
         }
 
     }
-
-
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-6 md:py-8 min-h-screen">
@@ -114,33 +140,88 @@ const MyStories = () => {
                 </nav>
             </div>
 
-            {
-                isLoading ? (
-                    <div className='w-full h-50 flex items-center justify-center'>
-                        <Loader />
-                    </div>
+            {activeTab !== 'saved' ? <>
+                {isLoading ? (<StoryCardLoader length={5} />
                 ) : isError ? (
                     <p className="text-red-500">{error?.message}</p>
                 ) : (
-                    <div className="space-y-4 md:space-y-6">
-                        {blogs?.pages?.flatMap(page => page?.data || []).length <= 0 ? (
-                            <div className='flex justify-center items-center h-50'>
-                                <p className='text-base-content/70 font-medium'>No stories found.</p>
+                    <>
+                        <div className="space-y-4 md:space-y-6">
+                            {blogs?.pages?.flatMap(page => page?.data || []).length <= 0 ? (
+                                <div className='flex justify-center items-center h-50'>
+                                    <p className='text-base-content/70 font-medium'>No stories found.</p>
+                                </div>
+                            ) : blogs?.pages?.flatMap(page => page?.data || []).map(blog => (
+                                <>
+                                    {
+                                        (
+                                            <StoryCard
+                                                key={blog.id}
+                                                blog={blog}
+                                                isFetching={false}
+                                                maxWidth='100%'
+                                                isAutherVisible={false}
+                                                isOpenFullBlog={activeTab == 'published'}
+                                                activeTab={activeTab}
+                                                isMenuShow={true}
+                                                getBlogId={(id) => setDeleteBlogId(id)}
+                                            />
+                                        )
+                                    }
+
+                                </>
+                            ))}
+                        </div>
+
+                        {hasNextPage ? (
+                            <div className="flex justify-center my-8">
+                                <button
+                                    onClick={() => fetchNextPage()}
+                                    disabled={!hasNextPage || isFetchingNextPage}
+                                    className="shadow-none btn-soft btn-secondary px-4 cursor-pointer text-sm font-medium btn rounded-full">
+                                    {isFetchingNextPage
+                                        ? 'Loading more...'
+                                        : hasNextPage
+                                            ? 'Show More Blogs' : 'No more blogs'}
+                                </button>
                             </div>
-                        ) : blogs?.pages?.flatMap(page => page?.data || []).map(blog => (
-                            <StoryCard
-                                key={blog.id}
-                                blog={blog}
-                                isFetching={isFetchingNextPage}
-                                maxWidth='100%'
-                                isAutherVisible={false}
-                                isOpenFullBlog={false}
-                                isMenuShow={true}
-                                getBlogId={(id) => setDeleteBlogId(id)}
-                            />
-                        ))}
-                    </div>
-                )
+                        ) : (
+                            <div className="flex justify-center my-8">
+                                <h5 className='text-base-content/70 font-medium'>No more blogs</h5>
+                            </div>
+                        )}
+                    </>
+                )}
+            </> : <>
+                {
+                    savedBlogsLoading ? (<StoryCardLoader length={5} />
+                    ) : savedBlogsIsError ? (
+                        <p className="text-red-500">{savedBlogsError?.message}</p>
+                    ) : (
+                        <div className="space-y-4 md:space-y-6">
+                            {savedBlogs?.pages?.flatMap(page => page?.data || []).length <= 0 ? (
+                                <div className='flex justify-center items-center h-50'>
+                                    <p className='text-base-content/70 font-medium'>No saved stories found.</p>
+                                </div>
+                            ) : savedBlogs?.pages?.flatMap(page => page?.data || []).map(blog => (
+                                <>
+                                    {
+                                        isFetchingSavedBlogs ? (
+                                            <StoryCardLoader key={`${blog.id}-loader`} />
+                                        ) : (
+                                            <StoryCard
+                                                key={blog.id}
+                                                blog={blog}
+                                                isFetching={isFetchingSavedBlogs}
+                                                maxWidth='100%'
+                                            />
+                                        )
+                                    }
+                                </>
+                            ))}
+                        </div>)
+                }
+            </>
             }
 
 

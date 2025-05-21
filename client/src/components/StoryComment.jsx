@@ -66,7 +66,7 @@ const StoryComment = ({ blogId, userId, blogAuthorId }) => {
             content: data.content,
             author: {
                id: user._id,
-               name: user.name,
+               name: userId == blogAuthorId ? 'You' : user.name,
                username: user.username,
                profileImage: user.profileImage,
             },

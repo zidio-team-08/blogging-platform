@@ -67,11 +67,6 @@ const HeaderMenu = ({ showMenu, setShowMenu, showMenuBtnRef, modalRef, user }) =
                         <p className="text-sm font-medium">My Stories</p>
                     </Link>
 
-                    <Link to='/saved' className="flex items-center border-b border-base-300 px-4 py-3 gap-3 hover:bg-base-300">
-                        <LuBookmarkCheck size={18} />
-                        <p className="text-sm font-medium">Saved</p>
-                    </Link>
-
                     <button
                         type='button'
                         onClick={menuBtnClick}

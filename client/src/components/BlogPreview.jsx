@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { FiImage, FiX, FiUpload } from 'react-icons/fi'
 import Select from 'react-select';
 import toast from 'react-hot-toast';
@@ -67,6 +67,10 @@ const BlogPreview = () => {
     const [loading, setLoading] = useState(false);
     const { fetchData } = useAxios();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [])
 
     // Improved image validation and processing
     const validateAndProcessImage = useCallback((file) => {

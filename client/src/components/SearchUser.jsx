@@ -7,6 +7,7 @@ import { FaArrowCircleDown } from 'react-icons/fa';
 import useApi from '../hook/api';
 import { useDispatch, useSelector } from 'react-redux';
 import { setFollowingStatus } from '../features/userActionsSlice';
+import SearchUserLoader from './Loaders/SearchUserLoader';
 
 const SearchUser = ({ query }) => {
    const navigate = useNavigate();
@@ -54,9 +55,7 @@ const SearchUser = ({ query }) => {
    return (
       <div className="w-full max-w-3xl mx-auto">
          {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-               <Loader />
-            </div>
+            <SearchUserLoader length={5} />
          ) : isError ? (
             <div className="flex justify-center items-center h-64 text-error">
                {error?.message || "Something went wrong"}

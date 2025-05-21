@@ -8,6 +8,7 @@ import Loader from "../components/Loader";
 import useApi from "../hook/api";
 import StoryCard from "../components/StoryCard";
 import { useSelector } from "react-redux";
+import StoryCardLoader from "../components/Loaders/StoryCardLoader";
 
 const UserProfile = () => {
 
@@ -142,7 +143,7 @@ const UserProfile = () => {
                     <div className="w-full">
                         {
                             userBlogsLoading ? (
-                                <Loader />
+                                <StoryCardLoader length={5} />
                             ) : userBlogsIsError ? (
                                 <div className='w-full h-96 flex items-center justify-center font-semibold'>
                                     {userBlogsError?.message || "Something went wrong"}
