@@ -134,10 +134,6 @@ const UserProfile = () => {
                         <div onClick={() => setActiveTab("home")} className={`px-4 py-2 flex items-center gap-2 cursor-pointer border-b-2 font-semibold ${activeTab == "home" ? "border-primary text-primary" : "border-transparent text-base-content/70"}`}>
                             Home
                         </div>
-
-                        <div onClick={() => setActiveTab("about")} className={`px-4 py-2 flex items-center gap-2 cursor-pointer border-b-2 font-semibold ${activeTab == "about" ? "border-primary text-primary" : "border-transparent text-base-content/70"}`}>
-                            About
-                        </div>
                     </div>
 
                     <div className="w-full">
