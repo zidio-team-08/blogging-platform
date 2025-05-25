@@ -1,109 +1,162 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import SearchUserInput from '../../components/admin-components/SearchUserInput';
+import AdminBlogItem from '../../components/admin-components/AdminBlogItem';
+import { useBlogPublishPrivateMutation, useDeleteBlogMutation, useGetBlogsQuery } from '../../features/api/apiSlice';
+import MainLoader from '../../components/Loaders/MainLoader';
+import ErrorComponent from '../../components/admin-components/Error';
+import useDebounce from '../../hook/useDebounce';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import useAxios from '../../hook/useAxios';
+import { useSelector } from 'react-redux';
+import Confirm from '../../components/modal/Confirm';
+import toast from 'react-hot-toast';
 
 const AdminBlogs = () => {
-  const [blogs, setBlogs] = useState([]);
-  const [loading, setLoading] = useState(true);
-const navigate = useNavigate();
-  const fetchBlogs = async () => {
-    try {
-      const res = await axios.get('/api/admin/blogs');
-      const data = res.data?.data;
 
-      if (Array.isArray(data)) {
-        setBlogs(data);
-      } else {
-        console.warn("Expected an array but got:", data);
-        setBlogs([]);
+   const { fetchAdminData } = useAxios();
+   const [searchParams] = useSearchParams();
+   const search = searchParams.get('query') || '';
+   const debouncedSearch = useDebounce(search, 300);
+   const [selectedBlog, setSelectedBlog] = useState("");
+   const [showModel, setShowModel] = useState(false);
+   const [deleteBlog, { isLoading: deleteBlogLoading }] = useDeleteBlogMutation();
+
+   const {
+      data: blogs,
+      isLoading,
+      isError,
+      isFetching,
+      error,
+      fetchNextPage,
+      hasNextPage,
+      isFetchingNextPage,
+      refetch,
+   } = useInfiniteQuery({
+      queryKey: ["ADMIN_BLOGS", debouncedSearch],
+      queryFn: async ({ pageParam = 1 }) => await fetchAdminData({
+         url: debouncedSearch ?
+            `/api/admin/blogs?page=${pageParam}&limit=10&search=${debouncedSearch}` :
+            `/api/admin/blogs?page=${pageParam}&limit=10`,
+         method: 'GET',
+      }),
+      getNextPageParam: (lastPage, allPages) => {
+         return lastPage?.data?.length === 10 ?
+            allPages.length + 1 : undefined;
+      },
+      initialPageParam: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 0,
+      cacheTime: 0,
+   });
+
+   // useBlogPublishPrivateMutation
+   const [blogPublishPrivate, { isLoading: blogPublishPrivateLoading }] = useBlogPublishPrivateMutation();
+
+   // handleDeleteBlog
+   const handleDeleteBlog = async () => {
+      const result = await deleteBlog(selectedBlog?.id);
+      if (result.error) {
+         toast.error(result?.error?.data?.message);
+         return;
+      };
+      if (result?.data?.success) {
+         toast.success(result.data.message);
+         setShowModel(false);
+         setSelectedBlog("");
+         refetch();
       }
-    } catch (err) {
-      console.error("Failed to fetch blogs:", err);
-      setBlogs([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+   };
 
-  useEffect(() => {
-    fetchBlogs();
-  }, []);
+   // handlePublishPrivateBlog
+   const handlePublishPrivateBlog = async (blogId, isPublished) => {
+      const result = await blogPublishPrivate({ blogId, isPublished });
+      if (result.error) {
+         toast.error(result?.error?.data?.message);
+         return;
+      };
+      if (result?.data?.success) {
+         toast.success(result.data.message);
+         refetch();
+      }
+   };
 
-const handleDelete = async (id) => {
-  try {
-    if (!id) {
-      console.error("Blog ID is undefined");
-      return;
-    }
+   return (
+      <div className="w-full h-full">
+         <div className="flex flex-col md:flex-row">
+            <div className="min-h-screen flex-1 xl:ml-64 p-3 sm:p-4 md:p-6 overflow-auto">
+               <div className="mb-4 sm:mb-6">
+                  <h1 className="text-xl sm:text-md capitalize font-bold text-base-content">Blogs Management</h1>
+                  <p className="text-base-content/80 text-sm mt-1 font-semibold">Manage all blogs in the system</p>
+               </div>
+               <SearchUserInput title='Search Blogs by title' />
+               {
+                  isLoading ? (
+                     <MainLoader />
+                  ) : isError ? (
+                     <ErrorComponent error={error} />
+                  ) : (
+                     <>
 
-    const confirmDelete = window.confirm("Are you sure you want to delete this blog?");
-    if (!confirmDelete) return;
-
-    await axios.delete(`/api/blogs/${id}`);
-    toast.success("Blog deleted successfully");
-  } catch (error) {
-    console.error("Error deleting blog:", error.response?.data || error.message);
-    toast.error("Failed to delete blog");
-  }
-};
-const handleUpdate = (id) => {
-  
-  navigate(`/admin/Editblog/${id}`);
-};
-
-
-
-  return (
-    <main className="ml-64 p-6 pt-20 max-xl:ml-0 max-xl:pt-4 transition-all">
-      <h1 className="text-2xl font-bold mb-6">Admin Blog Panel</h1>
-
-      {loading ? (
-        <p>Loading blogs...</p>
-      ) : blogs.length === 0 ? (
-        <p>No blogs found.</p>
-      ) : (
-        <div className="space-y-4">
-          {blogs.map((blog) => (
-            <div key={blog.id} className="border rounded-lg p-4 shadow bg-white dark:bg-gray-800">
-              <div className="flex items-start gap-4">
-                {blog.bannerImage && (
-                  <img
-                    src={blog.bannerImage}
-                    alt="Banner"
-                    className="w-32 h-20 object-cover rounded"
-                  />
-                )}
-                <div className="flex-1">
-                  <h2 className="text-xl font-semibold">{blog.title}</h2>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">
-                    By <strong>{blog.author.name}</strong> • {new Date(blog.createdAt).toLocaleDateString()}
-                  </p>
-                  <p className="text-sm mt-1">
-                    Tags: {Array.isArray(blog.tags) ? blog.tags.join(', ') : blog.tags}
-                  </p>
-                  <p className="text-sm">Likes: {blog.likes} • Comments: {blog.comments}</p>
-
-                  <div className="flex gap-2 mt-3">
-                    <button onClick={() => handleUpdate(blog.id)} className="text-blue-500 hover:text-blue-700">
-               Edit
-              </button>
-                    <button
-                      onClick={() => handleDelete(blog.id)}
-                      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                    >
-                      Delete
-                    </button> 
-
-                  </div>
-                </div>
-              </div>
+                        {
+                           blogs?.pages?.flatMap(page => page?.data || []).length > 0 ? (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                                 {blogs?.pages?.flatMap(page => page?.data || []).map((blog, index) => (
+                                    <AdminBlogItem
+                                       key={`${blog.id}-${index}`} blog={blog}
+                                       getDeletedBlogId={() => {
+                                          setSelectedBlog(blog);
+                                          setShowModel(true);
+                                       }}
+                                       handlePublishPrivateBlog={handlePublishPrivateBlog}
+                                    />
+                                 ))}
+                              </div>
+                           ) : (
+                              <div className='w-full h-96 flex items-center justify-center font-semibold'>No blogs found</div>
+                           )
+                        }
+                        <div className="flex justify-center my-8">
+                           <button
+                              onClick={() => fetchNextPage()}
+                              disabled={!hasNextPage || isFetchingNextPage}
+                              className="shadow-none btn-soft btn-secondary px-4 cursor-pointer text-sm font-medium btn rounded-full">
+                              {isFetchingNextPage
+                                 ? 'Loading more...'
+                                 : hasNextPage
+                                    ? 'Show More Blogs'
+                                    : 'No more blogs'}
+                           </button>
+                        </div>
+                     </>
+                  )
+               }
             </div>
-          ))}
-        </div>
-        
-      )}
-    </main>
-  );
+         </div>
+
+         {
+            showModel && (
+               <Confirm
+                  showModel={showModel}
+                  setShowModel={setShowModel}
+                  title="Confirmation Required"
+                  message={`Are you sure you want to delete this blog?`}
+                  className={`
+                  text-white !hover:bg-red-600 !bg-red-500
+                `}
+                  onConfirm={handleDeleteBlog}
+                  loading={deleteBlogLoading}
+                  onCancel={() => {
+                     setShowModel(false);
+                     setSelectedBlog("");
+                  }} />
+            )
+
+         }
+
+      </div>
+   );
 };
 
 export default AdminBlogs;

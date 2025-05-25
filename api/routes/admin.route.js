@@ -1,5 +1,5 @@
 import express from 'express';
-import { blockUnblockAdmin, blockUnblockUser, changeAdminPassword, createAdmin, deleteBlog, fetchAdmins, fetchUsers, getAdminProfile, getBlogDetailsById, getBlogs, getDashboardStats, getUserDetailsById, loginAdmin, logoutAdmin, updateAdmin, updateAdminProfile, updateAdminProfileImage, updateBlog, updateUser } from '../controller/admin.controller.js';
+import { blockUnblockAdmin, blockUnblockUser, blogPublishPrivate, changeAdminPassword, createAdmin, deleteBlog, fetchAdmins, fetchUsers, getAdminProfile, getBlogDetailsById, getBlogs, getDashboardStats, getUserDetailsById, loginAdmin, logoutAdmin, updateAdmin, updateAdminProfile, updateAdminProfileImage, updateBlog, updateUser } from '../controller/admin.controller.js';
 import { createAdminValidator, loginAdminValidator } from '../validator/admin.validator.js';
 import { validateRequest } from '../middleware/errorMiddleware.js';
 import { checkIsAuth, superAdminAccess } from '../middleware/adminMiddleware.js';
@@ -56,6 +56,9 @@ router.put('/blog/update-blog', checkIsAuth, uploadProfile.single('bannerImage')
 
 // delete blog =========== //
 router.delete('/blog/delete/:blogId', checkIsAuth, deleteBlog);
+
+// blog publish and private =========== //
+router.put('/blog/publish-private', checkIsAuth, blogPublishPrivate);
 
 
 // HANDLE ALL ADMINS RELATED ROUTERS

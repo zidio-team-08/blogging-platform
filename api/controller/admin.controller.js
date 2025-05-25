@@ -2,6 +2,7 @@ import adminModel from '../model/admin.model.js';
 import { errorHandler } from '../middleware/errorMiddleware.js';
 import User from '../model/user.model.js';
 import blogModel from '../model/blog.model.js';
+import commentModel from '../model/comment.model.js';
 import { blog_image_upload, deleteFilesFromCloudinary, profile_image_upload } from '../utils/uploadImage.js';
 
 
@@ -497,6 +498,7 @@ export const getBlogs = async (req, res, next) => {
         const page = query.page || 1;
         const limit = query.limit || 10;
         const skip = (page - 1) * limit;
+        const search = sanitizeQuery(query.search);
 
         if (page < 1) return next(new errorHandler('Page number cannot be less than 1', 400));
 
@@ -504,13 +506,44 @@ export const getBlogs = async (req, res, next) => {
 
         if (limit > 10) return next(new errorHandler('Limit cannot be greater than 10', 400));
 
-        const blogs = await blogModel.find()
-            .populate('author', 'name username profileImage')
-            .sort({ createdAt: -1 }).lean().skip(skip).limit(limit);
+        const blogs = await blogModel.find({
+            $or: [
+                { title: { $regex: search, $options: 'i' } },
+                { tags: { $regex: search, $options: 'i' } },
+            ]
+        }).populate('author', 'name username profileImage')
+            .lean()
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });
 
         if (!blogs) return next(new errorHandler('No blogs found', 404));
+        const totalBlogs = await blogModel.countDocuments().lean();
+        const totalPages = Math.ceil(totalBlogs / limit);
+
+        // Get comment counts in one query
+        const commentCounts = await commentModel.aggregate([
+            {
+                $match: {
+                    blogId: { $in: blogs.map((b) => b._id) }
+                }
+            },
+            {
+                $group: {
+                    _id: "$blogId",
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Convert commentCounts to a Map for quick lookup
+        const commentMap = new Map();
+        commentCounts.forEach(item => {
+            commentMap.set(item._id.toString(), item.count);
+        });
 
         const updated = blogs.map((blog) => {
+            const commentCount = commentMap.get(blog._id.toString()) || 0;
             return {
                 id: blog._id,
                 title: blog.title,
@@ -518,12 +551,13 @@ export const getBlogs = async (req, res, next) => {
                     id: blog.author._id,
                     name: blog.author.name,
                     username: blog.author.username,
-                    profileImage: blog.author.profileImage.url,
+                    profileImage: blog?.author?.profileImage?.url,
                 },
                 tags: blog.tags,
-                bannerImage: blog.bannerImage.url,
-                comments: blog.comments.length,
-                likes: blog.likes.length,
+                bannerImage: blog?.bannerImage?.url,
+                isPublished: blog.isPublished,
+                comments: commentCount,
+                likes: blog?.likes?.length,
                 createdAt: blog.createdAt,
                 updatedAt: blog.updatedAt,
             }
@@ -532,6 +566,7 @@ export const getBlogs = async (req, res, next) => {
         res.status(200).json({
             success: true,
             data: updated,
+            totalPages,
         });
 
     } catch (error) {
@@ -562,7 +597,7 @@ export const getBlogDetailsById = async (req, res, next) => {
                 id: blog.author._id,
                 name: blog.author.name,
                 username: blog.author.username,
-                profileImage: blog.author.profileImage.url,
+                profileImage: blog?.author?.profileImage?.url,
             },
             bannerImage: blog.bannerImage.url,
             comments: blog.comments.length,
@@ -580,7 +615,6 @@ export const getBlogDetailsById = async (req, res, next) => {
         next(error);
     }
 }
-
 
 // update blog ====================== //
 export const updateBlog = async (req, res, next) => {
@@ -671,6 +705,46 @@ export const deleteBlog = async (req, res, next) => {
         next(error);
     }
 }
+
+// blog publish and private ====================== //
+export const blogPublishPrivate = async (req, res, next) => {
+    try {
+
+        let { blogId, isPublished } = req.body;
+
+        if (!blogId) return next(new errorHandler('Please provide blogId', 400));
+
+        if (isPublished === undefined) return next(new errorHandler('Please provide isPublished', 400));
+
+        if (isPublished === null) return next(new errorHandler('isPublished cannot be null', 400));
+
+        if (isPublished === 'true') isPublished = true;
+        if (isPublished === 'false') isPublished = false;
+
+        if (isPublished !== true && isPublished !== false)
+            return next(new errorHandler('isPublished must be boolean', 400));
+
+        const blog = await blogModel.findById(blogId);
+
+        if (!blog) return next(new errorHandler('Blog not found', 404));
+
+        blog.isPublished = isPublished;
+        await blog.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Blog updated successfully',
+            data: {
+                id: blog._id,
+                isPublished: blog.isPublished,
+            },
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
 
 
 // fetch admins ====================== //

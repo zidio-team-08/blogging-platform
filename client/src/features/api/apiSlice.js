@@ -4,7 +4,7 @@ import { fetchBaseQueryWithReauth } from './fetchBaseQuery';
 export const apiSlice = createApi({
     reducerPath: 'api',
     baseQuery: fetchBaseQueryWithReauth,
-    tagTypes: ['User', 'Admin', 'AdminProfile'],
+    tagTypes: ['User', 'Admin', 'AdminProfile', 'Blog'],
     endpoints: (builder) => ({
         getDashboardStats: builder.query({
             query: () => '/api/admin/dashboard-stats',
@@ -79,7 +79,6 @@ export const apiSlice = createApi({
             }),
             invalidatesTags: [{ type: 'Admin', id: 'ADMINS_LIST' }],
         }),
-
         updateAdminProfile: builder.mutation({
             query: (data) => ({
                 url: '/api/admin/update-profile',
@@ -90,6 +89,29 @@ export const apiSlice = createApi({
         changeAdminPassword: builder.mutation({
             query: (data) => ({
                 url: '/api/admin/change-password',
+                method: 'PUT',
+                body: data,
+            }),
+        }),
+        getBlogs: builder.query({
+            query: ({ page = 1, search = '' }) => {
+                if (search) {
+                    return `/api/admin/blogs?page=${page}&limit=10&search=${search}`;
+                } else {
+                    return `/api/admin/blogs?page=${page}&limit=10`;
+                }
+            },
+            providesTags: [{ type: 'Blog', id: 'BLOGS_LIST' }],
+        }),
+        deleteBlog: builder.mutation({
+            query: (blogId) => ({
+                url: `/api/admin/blog/delete/${blogId}`,
+                method: 'DELETE',
+            }),
+        }),
+        blogPublishPrivate: builder.mutation({
+            query: (data) => ({
+                url: '/api/admin/blog/publish-private',
                 method: 'PUT',
                 body: data,
             }),
@@ -108,5 +130,7 @@ export const { useGetDashboardStatsQuery,
     useUpdateAdminMutation,
     useUpdateAdminProfileMutation,
     useChangeAdminPasswordMutation,
-    useUpdateAdminProfileImageMutation,
+    useGetBlogsQuery,
+    useDeleteBlogMutation,
+    useBlogPublishPrivateMutation,
 } = apiSlice;

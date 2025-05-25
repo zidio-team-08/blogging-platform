@@ -11,7 +11,6 @@ const NewStory = lazy(() => import("./pages/NewStory"));
 import ProtectedRoutes from './ProtectedRoutes';
 import AdminRoutes from './AdminRoutes';
 import Search from './pages/Search';
-// import AdminProfile from './pages/admin/AdminProfile';
 const Profile = lazy(() => import("./pages/Profile"));
 const MyStories = lazy(() => import("./pages/MyStories"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
