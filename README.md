@@ -73,8 +73,15 @@ The Zidio Admin Panel provides powerful tools for managing the platform:
 
 ## 🖼️ Screenshots
 
-![Blog Home Screenshot](client/public/platform-screenshot.png)
-![Admin Panel Screenshot](client/public/admin-screenshot.png)
+## 📸 Screenshots
+
+### Blog Home
+
+![Blog Home Screenshot](client/public/platform.png)
+
+### Admin Panel
+
+![Admin Panel Screenshot](client/public/admin_panel.png)
 
 ---
 
