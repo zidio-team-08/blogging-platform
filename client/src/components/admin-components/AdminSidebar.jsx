@@ -1,17 +1,27 @@
 import React, { useEffect, useState } from 'react'
 import { FiLogOut, FiHome, FiUsers, FiFileText, FiUserPlus } from 'react-icons/fi'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLogoutMutation } from '../../features/api/apiSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout as adminLogout } from '../../features/adminAuthSlice';
+import toast from 'react-hot-toast';
 
 const AdminSidebar = ({ isOpen, setIsOpen }) => {
 
     const location = useLocation();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const { admin } = useSelector((state) => state.adminAuth);
+
+    // console.log(admin.role);
+
 
     // Navigation items
     const navItems = [
         { path: '/admin', name: 'Dashboard', icon: <FiHome size={20} /> },
         { path: '/admin/users', name: 'Users', icon: <FiUsers size={20} /> },
         { path: '/admin/blogs', name: 'Blogs', icon: <FiFileText size={20} /> },
-        { path: '/admin/admins', name: 'Admins', icon: <FiUserPlus size={20} /> },
+        // { path: '/admin/admins', name: 'Admins', icon: <FiUserPlus size={20} /> },
     ];
 
     const NavItem = ({ item }) => {
@@ -35,7 +45,25 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
         if (window.innerWidth < 1280 && isOpen !== undefined) {
             setIsOpen(false);
         }
-    }, [location])
+    }, [location]);
+
+    const [logout, { isLoading: logoutLoading }] = useLogoutMutation();
+
+
+    const handleLogout = async () => {
+
+        const result = await logout();
+
+        if (result.error) {
+            toast.error(result.error.data.message);
+            return;
+        }
+        if (result.data.success) {
+            toast.success('Logout successful');
+            dispatch(adminLogout());
+            navigate('/admin/login', { replace: true });
+        }
+    }
 
 
     return (
@@ -54,14 +82,16 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                         {navItems.map((item, index) => (
                             <NavItem key={index} item={item} />
                         ))}
+                        {admin?.role === 'superadmin' && (
+                            <NavItem item={{ path: '/admin/admins', name: 'Admins', icon: <FiUserPlus size={20} /> }} />
+                        )}
                     </div>
 
                     <div className="px-3 mt-auto pb-4">
                         <button
+                            type='button'
                             className="flex items-center cursor-pointer gap-3 px-4 py-3 w-full rounded-md border border-red-500 text-red-600 hover:text-white hover:bg-red-600 dark:text-red-400 dark:hover:bg-red-500 dark:hover:text-white transition-colors"
-                            onClick={() => {
-                                console.log('Logging out...')
-                            }}>
+                            onClick={handleLogout}>
                             <FiLogOut size={20} />
                             <span className="font-medium">Logout</span>
                         </button>

@@ -13,10 +13,12 @@ const sanitizeQuery = (query) => {
         .toLowerCase();
 }
 
-const SearchUserInput = () => {
+const SearchUserInput = ({
+    title = "Search users by username or email",
+}) => {
 
-    const [inputValue, setInputValue] = useState('');
     const [searchParam, setSearchParam] = useSearchParams();
+    const [inputValue, setInputValue] = useState(searchParam.get('query') || '');
 
     const handleInputChange = (e) => {
         const sanitizedQuery = sanitizeQuery(e.target.value);
@@ -34,7 +36,7 @@ const SearchUserInput = () => {
             <div className="relative w-full md:w-96">
                 <input
                     type="text"
-                    placeholder="Search users by username or email"
+                    placeholder={title}
                     className="w-full py-3 text-base-content font-semibold px-5 text-sm focus:border-primary outline-none bg-base-100 border border-base-300 rounded-md"
                     value={inputValue}
                     onChange={handleInputChange}

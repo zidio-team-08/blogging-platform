@@ -48,14 +48,14 @@ export const checkIsAuth = async (req, res, next) => {
 // super admin access ========================== //
 export const superAdminAccess = async (req, res, next) => {
     try {
-        if (req.user.role !== 'superadmin') return res.status(401).json({
+        if (req.user.role !== 'superadmin') return res.status(403).json({
             success: false,
             message: 'You are not authorized to access this resource.',
         });
 
         next();
     } catch (error) {
-        return res.status(401).json({
+        return res.status(403).json({
             success: false,
             message: 'You are not authorized to access this resource.',
         });

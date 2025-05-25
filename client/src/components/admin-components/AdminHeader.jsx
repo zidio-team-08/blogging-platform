@@ -4,22 +4,15 @@ import { FiUser, FiSettings, FiLogOut, FiBell, FiX, FiMenu, FiHome, FiUsers, FiF
 import ThemeToggle from '../ThemeToggle'
 import AdminSidebar from './AdminSidebar'
 import AdminProfileDropdown from './AdminProfileDropdown'
+import { useSelector } from 'react-redux'
 
 const AdminHeader = () => {
     const [showDropdown, setShowDropdown] = useState(false)
-    const dropdownRef = useRef(null)
     const profileRef = useRef(null)
-
-    // Mock admin data - replace with actual data from your auth state
-    const admin = {
-        name: 'Admin User',
-        email: 'admin@example.com',
-        profileImage: 'https://randomuser.me/api/portraits/men/41.jpg'
-    }
-
+    const { admin } = useSelector((state) => state.adminAuth);
 
     const [isOpen, setIsOpen] = useState(false);
-    const location = useLocation()
+    
     const toggleSidebar = () => {
         setIsOpen(!isOpen)
     }
@@ -33,7 +26,7 @@ const AdminHeader = () => {
                     onClick={toggleSidebar}>{isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
                 </button>
                 <div className="flex items-center max-xl:absolute max-xl:left-1/2 max-xl:-translate-x-1/2">
-                    <Link to="/admin/dashboard" className="text-xl font-bold">
+                    <Link to="/admin" className="text-xl font-bold">
                         Admin Portal
                     </Link>
                 </div>
@@ -49,20 +42,19 @@ const AdminHeader = () => {
                             className="flex items-center gap-2 hover:bg-base-200 py-2 px-3 rounded-full cursor-pointer"
                             onClick={() => setShowDropdown(!showDropdown)}>
                             <div className="w-8 h-8 rounded-full overflow-hidden border border-base-300">
-                                {/* {admin.profileImage ? (
-                                <img
-                                    src={admin.profileImage}
-                                    alt="Admin"
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : ( */}
-                                <div className="w-full h-full flex items-center justify-center bg-primary text-white">
-                                    <FiUser size={16} />
-                                </div>
+                                {admin?.profileImage ? (
+                                    <img
+                                        src={admin?.profileImage}
+                                        alt="Admin"
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-primary text-white">
+                                        <FiUser size={16} />
+                                    </div>)}
                             </div>
-                            <span className="font-medium hidden md:block">{admin.name}</span>
+                            <span className="font-medium hidden md:block">{admin?.name?.split(' ')[0]}</span>
                         </button>
-
                         {/* Dropdown menu */}
                         {showDropdown && (
                             <AdminProfileDropdown admin={admin} setShowDropdown={setShowDropdown} profileRef={profileRef} />

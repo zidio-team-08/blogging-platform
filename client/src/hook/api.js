@@ -168,8 +168,6 @@ const useApi = () => {
         }
     }
 
-
-
     return { followUnfollow, postComment, likeUnlikeComment, likeUnlikeBlog, saveStory, blogVisibilityChange };
 }
 

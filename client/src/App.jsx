@@ -10,9 +10,8 @@ const Blog = lazy(() => import("./pages/Blog"));
 const NewStory = lazy(() => import("./pages/NewStory"));
 import ProtectedRoutes from './ProtectedRoutes';
 import AdminRoutes from './AdminRoutes';
-import AdminBlogs from './pages/admin/AdminBlogs';
 import Search from './pages/Search';
-import EditModalBlogs from './pages/admin/EditBlogPage';
+// import AdminProfile from './pages/admin/AdminProfile';
 const Profile = lazy(() => import("./pages/Profile"));
 const MyStories = lazy(() => import("./pages/MyStories"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
@@ -22,7 +21,9 @@ const EditBlog = lazy(() => import("./pages/EditBlog"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
-const EditBlogPage = lazy(()=> import("./pages/admin/EditBlogPage"));
+const AdminBlogs = lazy(() => import("./pages/admin/AdminBlogs"));
+const Admins = lazy(() => import("./pages/admin/Admins"));
+const AdminProfile = lazy(() => import("./pages/admin/AdminProfile"));
 
 const App = () => {
 
@@ -117,11 +118,19 @@ const App = () => {
                             <AdminBlogs />
                         </AdminRoutes>
                     } />
-                    <Route path='/admin/Editblog/:id' element={
+
+                    <Route path='/admin/admins' element={
                         <AdminRoutes>
-                            <EditBlogPage />
+                            <Admins />
                         </AdminRoutes>
-                    }/>
+                    } />
+
+                    <Route path='/admin/profile' element={
+                        <AdminRoutes>
+                            <AdminProfile />
+                        </AdminRoutes>
+                    } />
+
                 </Routes>
             </Suspense>
         </QueryClientProvider>
