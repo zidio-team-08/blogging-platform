@@ -12,6 +12,7 @@ import ProtectedRoutes from './ProtectedRoutes';
 import AdminRoutes from './AdminRoutes';
 import AdminBlogs from './pages/admin/AdminBlogs';
 import Search from './pages/Search';
+import EditModalBlogs from './pages/admin/EditBlogPage';
 const Profile = lazy(() => import("./pages/Profile"));
 const MyStories = lazy(() => import("./pages/MyStories"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
@@ -21,7 +22,7 @@ const EditBlog = lazy(() => import("./pages/EditBlog"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
-
+const EditBlogPage = lazy(()=> import("./pages/admin/EditBlogPage"));
 
 const App = () => {
 
@@ -116,6 +117,11 @@ const App = () => {
                             <AdminBlogs />
                         </AdminRoutes>
                     } />
+                    <Route path='/admin/Editblog/:id' element={
+                        <AdminRoutes>
+                            <EditBlogPage />
+                        </AdminRoutes>
+                    }/>
                 </Routes>
             </Suspense>
         </QueryClientProvider>
