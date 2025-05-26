@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import { axiosInstance } from '../utils/axiosInstance';
-import { handleResponse } from '../utils/responseHandler';
 
 const useAxios = () => {
 
