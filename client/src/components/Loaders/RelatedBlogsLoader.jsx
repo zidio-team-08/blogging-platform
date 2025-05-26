@@ -15,4 +15,4 @@ const RelatedBlogsLoader = ({ length = 5 }) => {
     )
 }
 
-export default RelatedBlogsLoader
+export default RelatedBlogsLoader;

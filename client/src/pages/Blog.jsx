@@ -11,8 +11,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import useApi from '../hook/api';
 import { setBlogLike, setFollowingStatus } from '../features/userActionsSlice';
 import toast from 'react-hot-toast';
-import RelatedBlogsLoader from '../components/Loaders/relatedBlogsLoader';
 import HelmetComponent from '../seo/Helmet';
+import RelatedBlogsLoader from '../components/Loaders/RelatedBlogsLoader';
 
 const LikeButton = ({ likes, isLiked, onLike }) => {
     return (
