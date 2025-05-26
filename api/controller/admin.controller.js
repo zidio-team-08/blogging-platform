@@ -79,12 +79,19 @@ export const loginAdmin = async (req, res, next) => {
 
         const token = await admin.generateToken();
 
+        const isProduction = process.env.NODE_ENV === "production";
+
+        console.log('isProduction', isProduction);
+
+
         res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV == "production", // Must be true in production
-            sameSite: process.env.NODE_ENV == "production" ? "None" : "Lax",
+            secure: isProduction,
+            sameSite: isProduction ? "None" : "Lax",
             maxAge: 24 * 60 * 60 * 1000,
         });
+
+
 
         return res.status(200).json({
             success: true,
