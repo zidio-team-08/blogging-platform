@@ -246,32 +246,17 @@ export const changeAdminPassword = async (req, res, next) => {
 // HANDLE ALL DASHBOARD RELATED ACTIONS
 export const getDashboardStats = async (req, res, next) => {
     try {
+        const recentUsersLimit = Math.min(Math.max(parseInt(req.query.recentUsersLimit) || 5, 1), 10);
 
-        const recentUsersLimit = req.query.recentUsersLimit || 5;
-
-        if (recentUsersLimit && recentUsersLimit < 1)
-            return next(new errorHandler('Recent users limit cannot be less than 1', 400));
-
-        if (recentUsersLimit && recentUsersLimit > 10)
-            return next(new errorHandler('Recent users limit cannot be greater than 20', 400));
-
-
-        const users = await User.find().sort({ createdAt: -1 }).lean();
-
-        if (!users) return next(new errorHandler('No users found', 404));
-
-        // const totalUsers = users.length;
-        const totalUsers = await User.countDocuments().lean();
-        const activeUsers = users.filter((user) => user.active).length;
-        const blockedUsers = users.filter((user) => !user.active).length;
-
-        const blogs = await blogModel.find().lean();
-
-        if (!blogs) return next(new errorHandler('No blogs found', 404));
-        const totalBlogs = await blogModel.countDocuments().lean();
-
-        // recent users 
-        const recentUsers = users.slice(0, recentUsersLimit);
+        const [users, totalUsers, activeUsers, blockedUsers, totalBlogs] = await Promise.all([
+            User.find({}, {
+                _id: 1, name: 1, email: 1, username: 1, role: 1, active: 1, bio: 1, profileImage: 1, socialLinks: 1, following: 1, followers: 1, createdAt: 1
+            }).sort({ createdAt: -1 }).limit(recentUsersLimit).lean(),
+            User.countDocuments(),
+            User.countDocuments({ active: true }),
+            User.countDocuments({ active: false }),
+            blogModel.countDocuments(),
+        ]);
 
         res.status(200).json({
             success: true,
@@ -280,30 +265,28 @@ export const getDashboardStats = async (req, res, next) => {
                 activeUsers,
                 blockedUsers,
                 totalBlogs,
-                recentJoinedUsers: recentUsers.map((user) => {
-                    return {
-                        id: user._id,
-                        name: user.name,
-                        email: user.email,
-                        username: user.username,
-                        role: user.role,
-                        active: user.active,
-                        bio: user?.bio,
-                        profileImage: user?.profileImage?.url,
-                        socialLinks: user?.socialLinks,
-                        following: user?.following?.length,
-                        followers: user?.followers?.length,
-                        createdAt: user?.createdAt,
-                    }
-                }),
+                recentJoinedUsers: users.map((user) => ({
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    username: user.username,
+                    role: user.role,
+                    active: user.active,
+                    bio: user?.bio,
+                    profileImage: user?.profileImage?.url,
+                    socialLinks: user?.socialLinks,
+                    following: user?.following?.length,
+                    followers: user?.followers?.length,
+                    createdAt: user?.createdAt,
+                })),
                 recentJoinedUsersLimit: recentUsersLimit,
             },
         });
-
     } catch (error) {
         next(error);
     }
-}
+};
+
 
 // HANDLE ALL USERS RELATED ACTIONS
 // fetch all users ================== //
